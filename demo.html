@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<script src="js/d3.v4.min.js"></script>
+<script src="js/topojson.v1.min.js"></script>
+
+<div id='svg'></div>
+
+<script>
+    var width = $(window).width()
+    var height = $(window).height()
+
+    var svg = d3.select('#svg').append('svg')
+        .attr('width', width)
+        .attr('height', height)
+
+    d3.csv('./fast-food-restaurants/Datafiniti_Fast_Food_Restaurants_May19.csv', function(data){
+        console.log(data.country)
+    })
+
+
+</script>
