@@ -3,18 +3,25 @@
 
 <script src="js/d3.v4.min.js"></script>
 <script src="js/topojson.v1.min.js"></script>
-
+<style>
+    html, body {
+        padding: 0;
+        margin: 0;
+    }
+</style>
 <div id='svg'></div>
 
 <script>
 
     var chartDiv = document.getElementById('svg')
-    var width = chartDiv.clientWidth;
-    var height = chartDiv.clientHeight;
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+
 
     var svg = d3.select('#svg').append('svg')
         .attr('width', width)
         .attr('height', height)
+        .style('background-color', '#F7F3B0')
 
 
     d3.csv('./fast-food-restaurants/Datafiniti_Fast_Food_Restaurants_May19.csv', function(d){
@@ -30,12 +37,23 @@
         process(rows)
     });
     
-    var projection = d3.geoAlbersUsa();
+    var projection = d3.geoAlbersUsa()
+
+    var path = d3.geoPath()
+        .projection(projection);
 
     var restaurants = d3.map()
     function process(data){
+
+        svg.append("g")
+            .enter().append("path")
+                .attr("d", path);
+
+        svg.append("path")
+            .attr("d", path);
+
         data.forEach(function(d) {
-            svg.append("circle").attr("r",5).attr("transform", function() {return "translate(" + projection([d.long,d.lat]) + ")";});
+            svg.append("circle").attr("r",2).attr("transform", function() {return "translate(" + projection([d.long,d.lat]) + ")";});
 
             if (restaurants.has(d.name)) {
                 restaurants.get(d.name).push(d.lat)
