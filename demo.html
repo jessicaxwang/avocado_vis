@@ -7,15 +7,19 @@
 <div id='svg'></div>
 
 <script>
-    var width = $(window).width()
-    var height = $(window).height()
+
+    var chartDiv = document.getElementById('svg')
+    var width = chartDiv.clientWidth;
+    var height = chartDiv.clientHeight;
+
+    console.log(width + " " + height)
 
     var svg = d3.select('#svg').append('svg')
         .attr('width', width)
         .attr('height', height)
 
     d3.csv('./fast-food-restaurants/Datafiniti_Fast_Food_Restaurants_May19.csv', function(data){
-        console.log(data.country)
+        console.log(data)
     })
 
 
