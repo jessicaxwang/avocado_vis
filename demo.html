@@ -9,20 +9,22 @@
         margin: 0;
     }
 </style>
-<div id='svg'></div>
+<div id='map'></div>
+
+<div id='firstbar'></div>
+
+<div id='totalBar'></div>
 
 <script>
 
-    var chartDiv = document.getElementById('svg')
+    var chartDiv = document.getElementById('map')
     var width = window.innerWidth;
     var height = window.innerHeight;
 
-
-    var svg = d3.select('#svg').append('svg')
+    var svg = d3.select('#map').append('svg')
         .attr('width', width)
         .attr('height', height)
         .style('background-color', '#F7F3B0')
-
 
     d3.csv('./fast-food-restaurants/Datafiniti_Fast_Food_Restaurants_May19.csv', function(d){
         return {
@@ -45,15 +47,15 @@
     var restaurants = d3.map()
     function process(data){
 
-        svg.append("g")
+        map.append("g")
             .enter().append("path")
                 .attr("d", path);
 
-        svg.append("path")
+        map.append("path")
             .attr("d", path);
 
         data.forEach(function(d) {
-            svg.append("circle").attr("r",2).attr("transform", function() {return "translate(" + projection([d.long,d.lat]) + ")";});
+            map.append("circle").attr("r",2).attr("transform", function() {return "translate(" + projection([d.long,d.lat]) + ")";});
 
             if (restaurants.has(d.name)) {
                 restaurants.get(d.name).push(d.lat)
