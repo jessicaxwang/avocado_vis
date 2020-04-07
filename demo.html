@@ -10,9 +10,7 @@
     }
 </style>
 <div id='map'></div>
-
 <div id='firstbar'></div>
-
 <div id='totalBar'></div>
 
 <script>
@@ -20,51 +18,73 @@
     var chartDiv = document.getElementById('map')
     var width = window.innerWidth;
     var height = window.innerHeight;
+    var regionMap = d3.map();
 
     var svg = d3.select('#map').append('svg')
         .attr('width', width)
         .attr('height', height)
         .style('background-color', '#F7F3B0')
 
-    d3.csv('./fast-food-restaurants/Datafiniti_Fast_Food_Restaurants_May19.csv', function(d){
+    // Shaping the data
+    d3.csv('./totalAvocado.csv', function(d){
         return {
-            id: d.id,
-            state: d.province,
-            city: d.city,
-            name: d.name,
-            lat: +d.latitude,
-            long: +d.longitude
+            week: d.Date,
+            year: d.year,
+            avgPrice: +d.AveragePrice,
+            region: d.region,
+            totalVolume: +d["Total Volume"],
+            type: d.type
         };
     }, function(error, rows) {
         process(rows)
     });
     
     var projection = d3.geoAlbersUsa()
-
     var path = d3.geoPath()
-        .projection(projection);
+    .projection(projection);
 
-    var restaurants = d3.map()
-    function process(data){
-
-        map.append("g")
-            .enter().append("path")
-                .attr("d", path);
-
-        map.append("path")
-            .attr("d", path);
-
+    /* Populate hashmap to order by region and year
+    Key: [region, year]
+    Value: [{
+        week,
+        avgPrice,
+        totalVolume
+    }]
+    */
+    function populateRegionMap(data) {
         data.forEach(function(d) {
-            map.append("circle").attr("r",2).attr("transform", function() {return "translate(" + projection([d.long,d.lat]) + ")";});
-
-            if (restaurants.has(d.name)) {
-                restaurants.get(d.name).push(d.lat)
+            if (regionMap.has([d.region, d.year])) {
+                regionMap.get([d.region, d.year]).push({
+                    week: d.week,
+                    avgPrice: +d.avgPrice,
+                    totalVolume: +d.totalVolume
+                });
             } else {
-                restaurants.set(d.name, [d.lat])
+                regionMap.set([d.region, d.year], [{
+                    week: d.week,
+                    avgPrice: +d.avgPrice,
+                    totalVolume: +d.totalVolume
+                }])
             }
-        })
+        });
+        console.log(regionMap)
+    }
+ 
+    function process(data){
+        populateRegionMap(data);
 
-        console.log(restaurants)
+        // map.append("g")
+        //     .enter().append("path")
+        //         .attr("d", path);
+
+        // map.append("path")
+        //     .attr("d", path);
+
+        // data.forEach(function(d) {
+        //     map.append("circle").attr("r",2).attr("transform", function() {return "translate(" + projection([d.long,d.lat]) + ")";});
+
+        // })
+        //console.log(data)
     }
 
 </script>
