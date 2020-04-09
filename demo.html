@@ -12,18 +12,18 @@
     <div id='barChart'></div>
     <script>
         var dummyData = [
-            {"month": "jan", "price": 10},
-            {"month": "feb", "price": 20},
-            {"month": "mar", "price": 40},
-            {"month": "apr", "price": 10},
-            {"month": "may", "price": 5},
-            {"month": "jun", "price": 11},
-            {"month": "jul", "price": 12},
-            {"month": "aug", "price": 20},
-            {"month": "sep", "price": 15},
-            {"month": "oct", "price": 4},
-            {"month": "nov", "price": 9},
-            {"month": "dec", "price": 10}
+            {"month": "jan", "price": [10, 20]},
+            {"month": "feb", "price": [20, 14]},
+            {"month": "mar", "price": [4, 40]},
+            {"month": "apr", "price": [10, 4]},
+            {"month": "may", "price": [5, 40]},
+            {"month": "jun", "price": [11, 8]},
+            {"month": "jul", "price": [12, 3]},
+            {"month": "aug", "price": [20, 2]},
+            {"month": "sep", "price": [15, 30]},
+            {"month": "oct", "price": [50, 40]},
+            {"month": "nov", "price": [12, 2]},
+            {"month": "dec", "price": [1, 10]}
         ];
         
         var chartDiv = document.getElementById('map')        
@@ -132,12 +132,17 @@
         
             x.domain(d3.extent(dummyData, function(d) { return parser(d.month); }));
             y.domain([0, d3.max(dummyData, function(d) { 
-                  return d.price;
+                  return Math.max(d.price[0], d.price[1]);
               })]);
 
-            var line = d3.line()
+            var line1 = d3.line()
                 .x(function(d) { return x(parser(d.month)); }) // set the x values for the line generator
-                .y(function(d) { return y(d.price); }) // set the y values for the line generator 
+                .y(function(d) { return y(d.price[0]); }) // set the y values for the line generator 
+                .curve(d3.curveMonotoneX) // apply smoothing to the line
+
+            var line2 = d3.line()
+                .x(function(d) { return x(parser(d.month)); }) // set the x values for the line generator
+                .y(function(d) { return y(d.price[1]); }) // set the y values for the line generator 
                 .curve(d3.curveMonotoneX) // apply smoothing to the line
 
             // Append x axis
@@ -151,21 +156,29 @@
                 .attr("class", "y axis")
                 .call(d3.axisLeft(y));
 
-            lineChart.append("path")
+            // two lines
+            var line1  = lineChart.append("path")
                 .datum(dummyData) // 10. Binds data to the line 
                 .attr("class", "line") // Assign a class for styling 
-                .attr("d", line);     
+                .attr("d", line1)  
+
+            var line2 = lineChart.append("path")
+                .datum(dummyData) // 10. Binds data to the line 
+                .attr("id", "line2")
+                .attr("class", "line") // Assign a class for styling 
+                .style("stroke", "white")
+                .attr("d", line2)  
 
             lineChart.selectAll(".dot")
                 .data(dummyData)
             .enter().append("circle")
-                .attr("class", "dot")
+                .attr("class", "line")
                 .attr("cx", function(d) { 
                     return x(parser(d.month)) })
                 .attr("cy", function(d) {
-                    return y(d.price)})
+                    return y(d.price[0])})
                 .attr("r", 5);
-    
+                
             // BAR CHART
         }
     
