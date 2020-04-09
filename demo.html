@@ -1,132 +1,202 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-
-<script src="js/d3.v4.min.js"></script>
-<script src="js/topojson.v1.min.js"></script>
-<style>
-    html, body {
-        padding: 0;
-        margin: 0;
-    }
-
-    .states {
-        fill: #583a3f;
-        stroke: #fff;
-    }
-</style>
-<div id='map'></div>
-<div id='firstbar'></div>
-<div id='totalBar'></div>
-
-<script>
-
-    var chartDiv = document.getElementById('map')
-    var pageWidth = window.innerWidth;
-    console.log(pageWidth);
-    var pageHeight = window.innerHeight;
-    console.log(pageHeight);
-    var regionMap = d3.map();
-
-    // Create Map
-    var projection = d3.geoAlbersUsa()
-        .translate([pageWidth / 2 , pageHeight / 2])
-        .scale([1000]);
-
-    var path = d3.geoPath()
-                .projection(projection);
-
-    var mapSvg = d3.select('#map').append('svg')
-        .attr('width', pageWidth)
-        .attr('height', pageHeight)
-        .style("background-color", "#568203")
-
-    d3.json("js/us.json", function(error, us){
-        mapSvg.append("path")
-            .attr("class", "states")
-            .datum(topojson.feature(us, us.objects.states))
-            .attr("d", path);
-    })
-
-    // Shaping the data
-    d3.csv('./totalAvocado.csv', function(d){
-        return {
-            week: d.Date,
-            year: d.year,
-            avgPrice: +d.AveragePrice,
-            region: d.region,
-            totalVolume: +d["Total Volume"],
-            type: d.type
-        };
-    }, function(error, rows) {
-        process(rows)
-    });
-
-    /* Populate hashmap to order by region and year
-    Key: [region, year]
-    Value: [{
-        week,
-        avgPrice,
-        totalVolume
-    }]
-    */
-    function populateRegionMap(data) {
-        data.forEach(function(d) {
-            if (regionMap.has([d.region, d.year])) {
-                regionMap.get([d.region, d.year]).push({
-                    week: d.week,
-                    avgPrice: +d.avgPrice,
-                    totalVolume: +d.totalVolume
-                });
-            } else {
-                regionMap.set([d.region, d.year], [{
-                    week: d.week,
-                    avgPrice: +d.avgPrice,
-                    totalVolume: +d.totalVolume
-                }])
-            }
-        });
-    }
- 
-    function process(data){
-        populateRegionMap(data);
-        // margin = {top: 20, right: 20, bottom: 30, left: 50};
-        // width = 960 - margin.left - margin.right,
-        // height = 500 - margin.top - margin.bottom;
-
-        // var x = d3.scaleTime().range([0, width]);
-        // var y = d3.scaleLinear().range([height, 0]);
-
-        // var valueline = d3.line()
-        //     .x(function(d) { return x(d.week); })
-        //     .y(function(d) { return y(d.avgPrice); });
-
-        // var lineGraph = d3.select("#firstbar").append("svg")
-        //         .attr("width", width + margin.left + margin.right)
-        //         .attr("height", height + margin.top + margin.bottom)
-        //     .append("g")
-        //         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-        // x.domain(d3. extent(data, function(d) { 
-        //     console.log(d)
-        //     return d.week; }));
-        // y.domain([0, d3.max(data, function(d) { return d.avgPrice; })]);
-
-        // svg.append("path")
-        //     .data([data])
-        //     .attr("class", "line")
-        //     .attr("d", valueline);
-        
-        // svg.append("g")
-        //     .attr("transform", "translate(0," + height + ")")
-        //     .call(d3.axisBottom(x));
-
-        // // Add the Y Axis
-        // svg.append("g")
-        //     .call(d3.axisLeft(y));
-
-  
-    }
-
+<html>
+<head>
+    <script src="js/d3.v4.min.js"></script>
+    <script src="js/topojson.v1.min.js"></script>
+    <style>
+        html, body {
+            padding: 0;
+            margin: 0;
+        }
     
+        .states {
+            fill: #ad9758;
+            stroke: #fff;
+        }
 
-</script>
+        #lineChart {
+            float: left;
+        }
+
+        #barChart {
+            float: left;
+        }
+    </style>
+</head>
+<body>
+    <div id='map'></div>
+    <div id='lineChart'></div>
+    <div id='barChart'></div>
+    <script>
+        margin = {top: 50, right: 50, bottom: 50, left: 50};
+    
+        var chartDiv = document.getElementById('map')        
+        var pageWidth = window.innerWidth;
+        var pageHeight = window.innerHeight;
+        var divColor = "#bae8c0";
+        var backgroundColor = "#556e53"
+        var regionMap = d3.map();
+    
+        d3.select("body").style("background-color", backgroundColor);
+    
+        // Create Map
+        var projection = d3.geoAlbersUsa()
+            .translate([pageWidth / 2 , pageHeight / 2])
+            .scale([1000]);
+    
+        var path = d3.geoPath()
+                    .projection(projection);
+    
+        var mapSvg = d3.select('#map').append('svg')
+            .attr('width', pageWidth)
+            .attr('height', pageHeight)
+            .style('background-color', divColor);
+    
+        d3.json("js/us.json", function(error, us){
+            mapSvg.append("path")
+                .attr("class", "states")
+                .datum(topojson.feature(us, us.objects.states))
+                .attr("d", path);
+        })
+    
+        // Create line chart
+        var lineChart = document.getElementById('lineChart');
+    
+        var chartWidth = (window.innerWidth) / 2; 
+        var chartHeight = window.innerHeight;
+        width = chartWidth - margin.left - margin.right,
+        height = chartHeight - margin.top - margin.bottom;
+    
+        var x = d3.scaleTime().range([0, width]);
+        var y = d3.scaleLinear().range([height, 0]);
+    
+        // Shaping the data
+        d3.csv('./totalAvocado.csv', function(d){
+            return {
+                week: d.Date,
+                year: d.year,
+                avgPrice: +d.AveragePrice,
+                region: d.region,
+                totalVolume: +d["Total Volume"],
+                type: d.type
+            };
+        }, function(error, rows) {
+            process(rows)
+        });
+    
+        /* Populate hashmap to order by region and year
+        Key: [region, year]
+        Value: [{
+            week,
+            avgPrice,
+            totalVolume
+        }]
+        */
+        function populateRegionMap(data) {
+            data.forEach(function(d) {
+                if (regionMap.has([d.region, d.year])) {
+                    regionMap.get([d.region, d.year]).push({
+                        week: d.week,
+                        avgPrice: +d.avgPrice,
+                        totalVolume: +d.totalVolume
+                    });
+                } else {
+                    regionMap.set([d.region, d.year], [{
+                        week: d.week,
+                        avgPrice: +d.avgPrice,
+                        totalVolume: +d.totalVolume
+                    }])
+                }
+            });
+        }
+        
+        var weeks = [];
+        function getWeeks(year) {
+            if (regionMap.has(["Albany", year])) {
+                var weekArray = regionMap.get(["Albany", year]);
+                for (i = 0; i < weekArray.length; i++) {
+                    if (!weeks.includes(weekArray[i].week)) 
+                        weeks.push(weekArray[i].week);
+                }
+            }
+        }
+    
+        function process(data){
+            populateRegionMap(data);
+            // getWeeks(2019)
+            // console.log(weeks.sort());
+            // console.log("size 2019: " + weeks.length);
+            // weeks = [];
+            // getWeeks(2017);
+            // console.log(weeks.sort());
+            // console.log("size 2017: " + weeks.length);
+            // weeks = [];
+            // getWeeks(2016);
+            // console.log(weeks.sort());
+            // console.log("size 2016: " + weeks.length);
+    
+            // LINE CHART
+            var valueline = d3.line()
+                .x(function(d) { return x(d.week); })
+                .y(function(d) { return y(d.avgPrice); });
+    
+            var lineGraph = d3.select("#lineChart").append("svg")
+                    .attr("width", pageWidth / 2)
+                    .attr("height", pageHeight)
+                    .style("background-color", divColor)
+                .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    
+            //console.log(weeks);
+            x.domain([0, 5])
+            y.domain([0, d3.max(data, function(d) { return d.avgPrice; })]);
+    
+            lineGraph.append("path")
+                .data([data])
+                .attr("class", "line")
+                .attr("d", valueline);
+            
+            lineGraph.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x));
+    
+            // Add the Y Axis
+            lineGraph.append("g")
+                .call(d3.axisLeft(y));
+    
+            // BAR CHART
+            var valueline = d3.line()
+                .x(function(d) { return x(d.week); })
+                .y(function(d) { return y(d.avgPrice); });
+    
+            var barChart = d3.select("#barChart").append("svg")
+                    .attr("width", pageWidth / 2)
+                    .attr("height", pageHeight)
+                    .style("background-color", divColor)
+                .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    
+            x.domain([0, 5])
+            y.domain([0, d3.max(data, function(d) { return d.avgPrice; })]);
+    
+            barChart.append("path")
+                .data([data])
+                .attr("class", "line")
+                .attr("d", valueline);
+            
+            barChart.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x));
+    
+            // Add the Y Axis
+            barChart.append("g")
+                .call(d3.axisLeft(y))
+        }
+    
+        
+    
+    </script>
+</body>
+
+</html>    
