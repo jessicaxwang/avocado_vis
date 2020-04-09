@@ -22,13 +22,14 @@
 
     var chartDiv = document.getElementById('map')
     var pageWidth = window.innerWidth;
+    console.log(pageWidth);
     var pageHeight = window.innerHeight;
+    console.log(pageHeight);
     var regionMap = d3.map();
-
 
     // Create Map
     var projection = d3.geoAlbersUsa()
-        .translate([pageWidth / 2, pageHeight / 4])
+        .translate([pageWidth / 2 , pageHeight / 2])
         .scale([1000]);
 
     var path = d3.geoPath()
@@ -36,7 +37,7 @@
 
     var mapSvg = d3.select('#map').append('svg')
         .attr('width', pageWidth)
-        .attr('height', pageHeight/2)
+        .attr('height', pageHeight)
         .style("background-color", "#568203")
 
     d3.json("js/us.json", function(error, us){
@@ -88,40 +89,40 @@
  
     function process(data){
         populateRegionMap(data);
-        margin = {top: 20, right: 20, bottom: 30, left: 50};
-        width = 960 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom;
+        // margin = {top: 20, right: 20, bottom: 30, left: 50};
+        // width = 960 - margin.left - margin.right,
+        // height = 500 - margin.top - margin.bottom;
 
-        var x = d3.scaleTime().range([0, width]);
-        var y = d3.scaleLinear().range([height, 0]);
+        // var x = d3.scaleTime().range([0, width]);
+        // var y = d3.scaleLinear().range([height, 0]);
 
-        var valueline = d3.line()
-            .x(function(d) { return x(d.week); })
-            .y(function(d) { return y(d.avgPrice); });
+        // var valueline = d3.line()
+        //     .x(function(d) { return x(d.week); })
+        //     .y(function(d) { return y(d.avgPrice); });
 
-        var lineGraph = d3.select("#firstbar").append("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-            .append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        // var lineGraph = d3.select("#firstbar").append("svg")
+        //         .attr("width", width + margin.left + margin.right)
+        //         .attr("height", height + margin.top + margin.bottom)
+        //     .append("g")
+        //         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        x.domain(d3. extent(data, function(d) { 
-            console.log(d)
-            return d.week; }));
-        y.domain([0, d3.max(data, function(d) { return d.avgPrice; })]);
+        // x.domain(d3. extent(data, function(d) { 
+        //     console.log(d)
+        //     return d.week; }));
+        // y.domain([0, d3.max(data, function(d) { return d.avgPrice; })]);
 
-        svg.append("path")
-            .data([data])
-            .attr("class", "line")
-            .attr("d", valueline);
+        // svg.append("path")
+        //     .data([data])
+        //     .attr("class", "line")
+        //     .attr("d", valueline);
         
-        svg.append("g")
-            .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(x));
+        // svg.append("g")
+        //     .attr("transform", "translate(0," + height + ")")
+        //     .call(d3.axisBottom(x));
 
-        // Add the Y Axis
-        svg.append("g")
-            .call(d3.axisLeft(y));
+        // // Add the Y Axis
+        // svg.append("g")
+        //     .call(d3.axisLeft(y));
 
   
     }
