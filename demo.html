@@ -1,19 +1,29 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
+<html>
+<head>
+    <script src="js/d3.v4.min.js"></script>
+    <script src="js/topojson.v1.min.js"></script>
+    <style>
+        html, body {
+            padding: 0;
+            margin: 0;
+        }
+    
+        .states {
+            fill: #ad9758;
+            stroke: #fff;
+        }
 
-<script src="js/d3.v4.min.js"></script>
-<script src="js/topojson.v1.min.js"></script>
-<style>
-    html, body {
-        padding: 0;
-        margin: 0;
-    }
+        #lineChart {
+            float: left;
+        }
 
-    .states {
-        fill: #ad9758;
-        stroke: #fff;
-    }
-</style>
+        #barChart {
+            float: left;
+        }
+    </style>
+</head>
 <body>
     <div id='map'></div>
     <div id='lineChart'></div>
@@ -53,10 +63,10 @@
         // Create line chart
         var lineChart = document.getElementById('lineChart');
     
-        var lineChartWidth = (window.innerWidth - margin.left - margin.right) / 2; 
-        var lineChartHeight = window.innerHeight - margin.top - margin.bottom;
-        width = lineChartWidth - margin.left - margin.right,
-        height = lineChartHeight - margin.top - margin.bottom;
+        var chartWidth = (window.innerWidth) / 2; 
+        var chartHeight = window.innerHeight;
+        width = chartWidth - margin.left - margin.right,
+        height = chartHeight - margin.top - margin.bottom;
     
         var x = d3.scaleTime().range([0, width]);
         var y = d3.scaleLinear().range([height, 0]);
@@ -114,26 +124,26 @@
     
         function process(data){
             populateRegionMap(data);
-            getWeeks(2019)
-            console.log(weeks.sort());
-            console.log("size 2019: " + weeks.length);
-            weeks = [];
-            getWeeks(2017);
-            console.log(weeks.sort());
-            console.log("size 2017: " + weeks.length);
-            weeks = [];
-            getWeeks(2016);
-            console.log(weeks.sort());
-            console.log("size 2016: " + weeks.length);
+            // getWeeks(2019)
+            // console.log(weeks.sort());
+            // console.log("size 2019: " + weeks.length);
+            // weeks = [];
+            // getWeeks(2017);
+            // console.log(weeks.sort());
+            // console.log("size 2017: " + weeks.length);
+            // weeks = [];
+            // getWeeks(2016);
+            // console.log(weeks.sort());
+            // console.log("size 2016: " + weeks.length);
     
-            // Create Line Chart
+            // LINE CHART
             var valueline = d3.line()
                 .x(function(d) { return x(d.week); })
                 .y(function(d) { return y(d.avgPrice); });
     
             var lineGraph = d3.select("#lineChart").append("svg")
-                    .attr("width", (pageWidth + margin.left + margin.right) / 2)
-                    .attr("height", pageHeight + margin.top + margin.bottom)
+                    .attr("width", pageWidth / 2)
+                    .attr("height", pageHeight)
                     .style("background-color", divColor)
                 .append("g")
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -155,14 +165,14 @@
             lineGraph.append("g")
                 .call(d3.axisLeft(y));
     
-            // Create bar chart
+            // BAR CHART
             var valueline = d3.line()
                 .x(function(d) { return x(d.week); })
                 .y(function(d) { return y(d.avgPrice); });
     
-            var lineGraph = d3.select("#barChart").append("svg")
-                    .attr("width", (pageWidth + margin.left + margin.right) / 2)
-                    .attr("height", pageHeight + margin.top + margin.bottom)
+            var barChart = d3.select("#barChart").append("svg")
+                    .attr("width", pageWidth / 2)
+                    .attr("height", pageHeight)
                     .style("background-color", divColor)
                 .append("g")
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -170,17 +180,17 @@
             x.domain([0, 5])
             y.domain([0, d3.max(data, function(d) { return d.avgPrice; })]);
     
-            lineGraph.append("path")
+            barChart.append("path")
                 .data([data])
                 .attr("class", "line")
                 .attr("d", valueline);
             
-            lineGraph.append("g")
+            barChart.append("g")
                 .attr("transform", "translate(0," + height + ")")
                 .call(d3.axisBottom(x));
     
             // Add the Y Axis
-            lineGraph.append("g")
+            barChart.append("g")
                 .call(d3.axisLeft(y))
         }
     
@@ -189,3 +199,4 @@
     </script>
 </body>
 
+</html>    
