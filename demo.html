@@ -8,6 +8,11 @@
         padding: 0;
         margin: 0;
     }
+
+    .states {
+        fill: #583a3f;
+        stroke: #fff;
+    }
 </style>
 <div id='map'></div>
 <div id='firstbar'></div>
@@ -15,16 +20,31 @@
 
 <script>
 
-    // adding a comment test test
     var chartDiv = document.getElementById('map')
-    var width = window.innerWidth;
-    var height = window.innerHeight;
+    var pageWidth = window.innerWidth;
+    var pageHeight = window.innerHeight;
     var regionMap = d3.map();
 
-    var svg = d3.select('#map').append('svg')
-        .attr('width', width)
-        .attr('height', height)
-        .style('background-color', '#F7F3B0')
+
+    // Create Map
+    var projection = d3.geoAlbersUsa()
+        .translate([pageWidth / 2, pageHeight / 4])
+        .scale([1000]);
+
+    var path = d3.geoPath()
+                .projection(projection);
+
+    var mapSvg = d3.select('#map').append('svg')
+        .attr('width', pageWidth)
+        .attr('height', pageHeight/2)
+        .style("background-color", "#568203")
+
+    d3.json("js/us.json", function(error, us){
+        mapSvg.append("path")
+            .attr("class", "states")
+            .datum(topojson.feature(us, us.objects.states))
+            .attr("d", path);
+    })
 
     // Shaping the data
     d3.csv('./totalAvocado.csv', function(d){
@@ -39,10 +59,6 @@
     }, function(error, rows) {
         process(rows)
     });
-    
-    var projection = d3.geoAlbersUsa()
-    var path = d3.geoPath()
-    .projection(projection);
 
     /* Populate hashmap to order by region and year
     Key: [region, year]
@@ -74,18 +90,9 @@
     function process(data){
         populateRegionMap(data);
 
-        // map.append("g")
-        //     .enter().append("path")
-        //         .attr("d", path);
-
-        // map.append("path")
-        //     .attr("d", path);
-
-        // data.forEach(function(d) {
-        //     map.append("circle").attr("r",2).attr("transform", function() {return "translate(" + projection([d.long,d.lat]) + ")";});
-
-        // })
-        //console.log(data)
+  
     }
+
+    
 
 </script>
