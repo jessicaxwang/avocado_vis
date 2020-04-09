@@ -1,0 +1,35 @@
+html, body {
+    padding: 0;
+    margin: 0;
+}
+
+.states {
+    fill: #ad9758;
+    stroke: #fff;
+}
+
+#lineChart {
+    float: left;
+    background-color: #bae8c0;
+}
+
+#barChart {
+    float: left;
+}
+
+/* Style the lines by removing the fill and applying a stroke */
+.line {
+    fill: none;
+    stroke: #ffab00;
+    stroke-width: 3;
+}
+
+/* Style the dots by assigning a fill and stroke */
+.dot {
+    fill: #ffab00;
+    stroke: #fff;
+}
+
+
+
+
