@@ -105,17 +105,6 @@
                 }
             });
         }
-        
-        var weeks = [];
-        function getWeeks(year) {
-            if (regionMap.has(["Albany", year])) {
-                var weekArray = regionMap.get(["Albany", year]);
-                for (i = 0; i < weekArray.length; i++) {
-                    if (!weeks.includes(weekArray[i].week)) 
-                        weeks.push(weekArray[i].week);
-                }
-            }
-        }
     
         function process(data){
             populateRegionMap(data);    
