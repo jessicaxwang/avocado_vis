@@ -57,8 +57,8 @@
     
         // Create line chart
         var margin = {left: 50, right: 50, top: 50, bottom: 50};
-        var width = (pageWidth - margin.left - margin.right); 
-        var height = pageHeight - margin.bottom - margin.top;
+        var width = pageWidth / 2.5 ; 
+        var height = pageHeight;
 
         var lineChart = d3.select("#lineChart").append("svg")
             .attr("width", width + margin.left + margin.right)
@@ -125,14 +125,14 @@
               })]);
 
             var line1 = d3.line()
-                .x(function(d) { return x(parser(d.month)); }) // set the x values for the line generator
-                .y(function(d) { return y(d.price[0]); }) // set the y values for the line generator 
-                .curve(d3.curveMonotoneX) // apply smoothing to the line
+                .x(function(d) { return x(parser(d.month)); })
+                .y(function(d) { return y(d.price[0]); }) 
+                .curve(d3.curveMonotoneX)
 
             var line2 = d3.line()
-                .x(function(d) { return x(parser(d.month)); }) // set the x values for the line generator
-                .y(function(d) { return y(d.price[1]); }) // set the y values for the line generator 
-                .curve(d3.curveMonotoneX) // apply smoothing to the line
+                .x(function(d) { return x(parser(d.month)); })
+                .y(function(d) { return y(d.price[1]); }) 
+                .curve(d3.curveMonotoneX)
 
             // Append x axis
             lineChart.append("g")
@@ -147,14 +147,14 @@
 
             // two lines
             var line1  = lineChart.append("path")
-                .datum(dummyData) // 10. Binds data to the line 
-                .attr("class", "line") // Assign a class for styling 
+                .datum(dummyData)
+                .attr("class", "line")
                 .attr("d", line1)  
 
             var line2 = lineChart.append("path")
-                .datum(dummyData) // 10. Binds data to the line 
+                .datum(dummyData)
                 .attr("id", "line2")
-                .attr("class", "line") // Assign a class for styling 
+                .attr("class", "line")
                 .style("stroke", "white")
                 .attr("d", line2)  
 
