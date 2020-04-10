@@ -11,20 +11,20 @@
     <div id='lineChart'></div>
     <div id='barChart'></div>
     <script>
-        var dummyData = [
-            {"month": "jan", "price": [10, 20]},
-            {"month": "feb", "price": [20, 14]},
-            {"month": "mar", "price": [4, 40]},
-            {"month": "apr", "price": [10, 4]},
-            {"month": "may", "price": [5, 40]},
-            {"month": "jun", "price": [11, 8]},
-            {"month": "jul", "price": [12, 3]},
-            {"month": "aug", "price": [20, 2]},
-            {"month": "sep", "price": [15, 30]},
-            {"month": "oct", "price": [50, 40]},
-            {"month": "nov", "price": [12, 2]},
-            {"month": "dec", "price": [1, 10]}
-        ];
+        // var data = [
+        //     {"month": "jan", "price": [10, 20]},
+        //     {"month": "feb", "price": [20, 14]},
+        //     {"month": "mar", "price": [4, 40]},
+        //     {"month": "apr", "price": [10, 4]},
+        //     {"month": "may", "price": [5, 40]},
+        //     {"month": "jun", "price": [11, 8]},
+        //     {"month": "jul", "price": [12, 3]},
+        //     {"month": "aug", "price": [20, 2]},
+        //     {"month": "sep", "price": [15, 30]},
+        //     {"month": "oct", "price": [50, 40]},
+        //     {"month": "nov", "price": [12, 2]},
+        //     {"month": "dec", "price": [1, 10]}
+        // ];
         
         var chartDiv = document.getElementById('map')        
         var pageWidth = window.innerWidth;
@@ -67,47 +67,47 @@
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         // Shaping the data
-        d3.csv('./totalAvocado_v5.csv', function(d){
-            return {
-                week: d.Date,
-                year: d.year,
-                avgPrice: +d.AveragePrice,
-                region: d.region,
-                totalVolume: +d["Total Volume"],
-                type: d.type
-            };
-        }, function(error, rows) {
-            process(rows)
+        // d3.csv('./totalAvocado_v5.csv', function(d){
+        //     return {
+        //         week: d.Date,
+        //         year: d.year,
+        //         avgPrice: +d.AveragePrice,
+        //         region: d.region,
+        //         totalVolume: +d["Total Volume"],
+        //         type: d.type
+        //     };
+        // }, function(error, rows) {
+        //     process(rows)
+        // });
+
+        var regionPrices = d3.map()
+        d3.csv('./avgAvocado.csv', function(d) {
+            avgPrices = [d.jan, d.feb, d.mar, d.apr, d.may, d.jun, d.jul, d.aug, d.sep, d.oct, d.nov, d.dec]
+            regionPrices.set([d.region, d.year], avgPrices)
+        }, function (error, rows) {
+            processLineChart(rows)
         });
-    
-        /* Populate hashmap to order by region and year
-        Key: [region, year]
-        Value: [{
-            week,
-            avgPrice,
-            totalVolume
-        }]
-        */
-        function populateRegionMap(data) {
-            data.forEach(function(d) {
-                if (regionMap.has([d.region, d.year])) {
-                    regionMap.get([d.region, d.year]).push({
-                        week: d.week,
-                        avgPrice: +d.avgPrice,
-                        totalVolume: +d.totalVolume
-                    });
-                } else {
-                    regionMap.set([d.region, d.year], [{
-                        week: d.week,
-                        avgPrice: +d.avgPrice,
-                        totalVolume: +d.totalVolume
-                    }])
-                }
-            });
-        }
-    
-        function process(data){
-            populateRegionMap(data);    
+
+        function processLineChart(data){
+            y2016 = regionPrices.get(['San Francisco', '2016'])
+            y2017 = regionPrices.get(['San Francisco', '2017'])
+            y2018 = regionPrices.get(['San Francisco', '2018'])
+            y2019 = regionPrices.get(['San Francisco', '2019'])
+            priceDict = [
+                {"month": "jan", "prices": [y2016[0], y2017[0], y2018[0], y2019[0]]},
+                {"month": "feb", "prices": [y2016[1], y2017[1], y2018[1], y2019[1]]},
+                {"month": "mar", "prices": [y2016[2], y2017[2], y2018[2], y2019[2]]},
+                {"month": "apr", "prices": [y2016[3], y2017[3], y2018[3], y2019[3]]},
+                {"month": "may", "prices": [y2016[4], y2017[4], y2018[4], y2019[4]]},
+                {"month": "jun", "prices": [y2016[5], y2017[5], y2018[5], y2019[5]]},
+                {"month": "jul", "prices": [y2016[6], y2017[6], y2018[6], y2019[6]]},
+                {"month": "aug", "prices": [y2016[7], y2017[7], y2018[7], y2019[7]]},
+                {"month": "sep", "prices": [y2016[8], y2017[8], y2018[8], y2019[8]]},
+                {"month": "oct", "prices": [y2016[9], y2017[9], y2018[9], y2019[9]]},
+                {"month": "nov", "prices": [y2016[10], y2017[10], y2018[10], y2019[10]]},
+                {"month": "dec", "prices": [y2016[11], y2017[11], y2018[11], y2019[11]] }
+            ]
+
             // LINE CHART
             // -------------------- Scaling -----------------------//
             var x = d3.scaleTime()
@@ -119,19 +119,31 @@
             var xFormat = "%b";
             var parser = d3.timeParse("%b")
         
-            x.domain(d3.extent(dummyData, function(d) { return parser(d.month); }));
-            y.domain([0, d3.max(dummyData, function(d) { 
-                  return Math.max(d.price[0], d.price[1]);
+            x.domain(d3.extent(priceDict, function(d) { return parser(d.month); }));
+            y.domain([d3.min(priceDict, function(d) {
+                return Math.min(d.prices[0], d.prices[1], d.prices[2], d.prices[3]) - 0.1;
+            }), d3.max(priceDict, function(d) { 
+                  return Math.max(d.prices[0], d.prices[1], d.prices[2], d.prices[3]);
               })]);
 
             var line1 = d3.line()
                 .x(function(d) { return x(parser(d.month)); })
-                .y(function(d) { return y(d.price[0]); }) 
+                .y(function(d) { return y(d.prices[0]); }) 
                 .curve(d3.curveMonotoneX)
-
+            
             var line2 = d3.line()
                 .x(function(d) { return x(parser(d.month)); })
-                .y(function(d) { return y(d.price[1]); }) 
+                .y(function(d) { return y(d.prices[1]); }) 
+                .curve(d3.curveMonotoneX)
+                        
+            var line3 = d3.line()
+                .x(function(d) { return x(parser(d.month)); })
+                .y(function(d) { return y(d.prices[2]); }) 
+                .curve(d3.curveMonotoneX)
+            
+            var line4 = d3.line()
+                .x(function(d) { return x(parser(d.month)); })
+                .y(function(d) { return y(d.prices[3]); }) 
                 .curve(d3.curveMonotoneX)
 
             // Append x axis
@@ -145,30 +157,33 @@
                 .attr("class", "y axis")
                 .call(d3.axisLeft(y));
 
-            // two lines
-            var line1  = lineChart.append("path")
-                .datum(dummyData)
+            // 2016
+            var line16 = lineChart.append("path")
+                .datum(priceDict)
                 .attr("class", "line")
+                .attr("id", "sixteen")
                 .attr("d", line1)  
 
-            var line2 = lineChart.append("path")
-                .datum(dummyData)
-                .attr("id", "line2")
+            // 2017
+            var line17 = lineChart.append("path")
+                .datum(priceDict)
                 .attr("class", "line")
-                .style("stroke", "white")
+                .attr("id", "seventeen")
                 .attr("d", line2)  
 
-            lineChart.selectAll(".dot")
-                .data(dummyData)
-            .enter().append("circle")
+            // 2018
+            var line18 = lineChart.append("path")
+                .datum(priceDict)
                 .attr("class", "line")
-                .attr("cx", function(d) { 
-                    return x(parser(d.month)) })
-                .attr("cy", function(d) {
-                    return y(d.price[0])})
-                .attr("r", 5);
-                
-            // BAR CHART
+                .attr("id", "eighteen")
+                .attr("d", line3) 
+            
+            // 2019
+            var line19 = lineChart.append("path")
+                .datum(priceDict)
+                .attr("class", "line")
+                .attr("id", "nineteen")
+                .attr("d", line4)   
         }
     
         
