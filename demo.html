@@ -73,7 +73,7 @@
             avgPrices = [d.jan, d.feb, d.mar, d.apr, d.may, d.jun, d.jul, d.aug, d.sep, d.oct, d.nov, d.dec]
             regionPrices.set([d.region, d.year], avgPrices)
         }, function (error, rows) {
-            processLineChart(rows, "Boston")
+            processLineChart(rows, "San Francisco")
             // Button handling here
         });
 
@@ -125,6 +125,8 @@
                         })
                     };
                 });
+
+                console.log(prices)
 
                 // --------------- DOMAINS ------------------ // 
                 x.domain(d3.extent(priceDict, function(d) {
@@ -271,7 +273,7 @@
                         idx = bisect(d.values, xDate);
 
                         d3.select(this).select('text')
-                        .text(y.invert(y(d.values[idx].price)).toFixed(2));
+                        .text("$" + (y.invert(y(d.values[idx].price)).toFixed(2)));
 
                         d3.select(".mouse-line")
                         .attr("d", function () {
@@ -282,11 +284,10 @@
                         return "translate(" + x(parser(d.values[idx].date)) + "," + y(d.values[idx].price) + ")";
                     });
                 });
+            } else {
+                console.log("not found")
             }
         }
-    
-        
-    
     </script>
 </body>
 
