@@ -54,6 +54,7 @@
         .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+
         // Shaping the data
         // d3.csv('./totalAvocado_v5.csv', function(d){
         //     return {
@@ -73,7 +74,7 @@
             avgPrices = [d.jan, d.feb, d.mar, d.apr, d.may, d.jun, d.jul, d.aug, d.sep, d.oct, d.nov, d.dec]
             regionPrices.set([d.region, d.year], avgPrices)
         }, function (error, rows) {
-            processLineChart(rows, "San Francisco")
+            processLineChart(rows, "Albany")
             // Button handling here
         });
 
@@ -97,6 +98,14 @@
                     {"month": "nov", "2016": y2016[10], "2017": y2017[10], "2018": y2018[10], "2019": y2019[10]},
                     {"month": "dec", "2016": y2016[11], "2017": y2017[11], "2018": y2018[11], "2019": y2019[11]}
                 ]
+                
+                // New title
+                lineChart.append('text')
+                    .attr('x', (width / 2))             
+                    .attr('y', 0 - (margin.top / 3))
+                    .attr('text-anchor', 'middle')  
+                    .style('font-size', '16px')
+                    .text(region)
 
                 // -------------------- Scaling -----------------------//
                 var x = d3.scaleTime()
@@ -178,7 +187,7 @@
                 // Append y axis
                 lineChart.append("g")
                     .attr("class", "y axis")
-                    .call(d3.axisLeft(y)); 
+                    .call(d3.axisLeft(y));
 
                 // Adding dots for price point
                 price.append("g").selectAll("circle")
