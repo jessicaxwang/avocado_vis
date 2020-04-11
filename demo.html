@@ -4,6 +4,9 @@
 <head>
     <script src="js/d3.v4.min.js"></script>
     <script src="js/topojson.v1.min.js"></script>	
+    <script src="https://d3js.org/d3-color.v1.min.js"></script>
+    <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -11,21 +14,6 @@
     <div id='lineChart'></div>
     <div id='barChart'></div>
     <script>
-        // var data = [
-        //     {"month": "jan", "price": [10, 20]},
-        //     {"month": "feb", "price": [20, 14]},
-        //     {"month": "mar", "price": [4, 40]},
-        //     {"month": "apr", "price": [10, 4]},
-        //     {"month": "may", "price": [5, 40]},
-        //     {"month": "jun", "price": [11, 8]},
-        //     {"month": "jul", "price": [12, 3]},
-        //     {"month": "aug", "price": [20, 2]},
-        //     {"month": "sep", "price": [15, 30]},
-        //     {"month": "oct", "price": [50, 40]},
-        //     {"month": "nov", "price": [12, 2]},
-        //     {"month": "dec", "price": [1, 10]}
-        // ];
-        
         var chartDiv = document.getElementById('map')        
         var pageWidth = window.innerWidth;
         var pageHeight = window.innerHeight;
@@ -85,105 +73,217 @@
             avgPrices = [d.jan, d.feb, d.mar, d.apr, d.may, d.jun, d.jul, d.aug, d.sep, d.oct, d.nov, d.dec]
             regionPrices.set([d.region, d.year], avgPrices)
         }, function (error, rows) {
-            processLineChart(rows)
+            processLineChart(rows, "Boston")
+            // Button handling here
         });
 
-        function processLineChart(data){
-            y2016 = regionPrices.get(['San Francisco', '2016'])
-            y2017 = regionPrices.get(['San Francisco', '2017'])
-            y2018 = regionPrices.get(['San Francisco', '2018'])
-            y2019 = regionPrices.get(['San Francisco', '2019'])
-            priceDict = [
-                {"month": "jan", "prices": [y2016[0], y2017[0], y2018[0], y2019[0]]},
-                {"month": "feb", "prices": [y2016[1], y2017[1], y2018[1], y2019[1]]},
-                {"month": "mar", "prices": [y2016[2], y2017[2], y2018[2], y2019[2]]},
-                {"month": "apr", "prices": [y2016[3], y2017[3], y2018[3], y2019[3]]},
-                {"month": "may", "prices": [y2016[4], y2017[4], y2018[4], y2019[4]]},
-                {"month": "jun", "prices": [y2016[5], y2017[5], y2018[5], y2019[5]]},
-                {"month": "jul", "prices": [y2016[6], y2017[6], y2018[6], y2019[6]]},
-                {"month": "aug", "prices": [y2016[7], y2017[7], y2018[7], y2019[7]]},
-                {"month": "sep", "prices": [y2016[8], y2017[8], y2018[8], y2019[8]]},
-                {"month": "oct", "prices": [y2016[9], y2017[9], y2018[9], y2019[9]]},
-                {"month": "nov", "prices": [y2016[10], y2017[10], y2018[10], y2019[10]]},
-                {"month": "dec", "prices": [y2016[11], y2017[11], y2018[11], y2019[11]] }
-            ]
+        function processLineChart(data, region) {
+            if (regionPrices.has([region, '2016'])) {
+                y2016 = regionPrices.get([region, '2016'])
+                y2017 = regionPrices.get([region, '2017'])
+                y2018 = regionPrices.get([region, '2018'])
+                y2019 = regionPrices.get([region, '2019'])
+                priceDict = [
+                    {"month": "jan", "2016": y2016[0], "2017": y2017[0], "2018": y2018[0], "2019": y2019[0]},
+                    {"month": "feb", "2016": y2016[1], "2017": y2017[1], "2018": y2018[1], "2019": y2019[1]},
+                    {"month": "mar", "2016": y2016[2], "2017": y2017[2], "2018": y2018[2], "2019": y2019[2]},
+                    {"month": "apr", "2016": y2016[3], "2017": y2017[3], "2018": y2018[3], "2019": y2019[3]},
+                    {"month": "may", "2016": y2016[4], "2017": y2017[4], "2018": y2018[4], "2019": y2019[4]},
+                    {"month": "jun", "2016": y2016[5], "2017": y2017[5], "2018": y2018[5], "2019": y2019[5]},
+                    {"month": "jul", "2016": y2016[6], "2017": y2017[6], "2018": y2018[6], "2019": y2019[6]},
+                    {"month": "aug", "2016": y2016[7], "2017": y2017[7], "2018": y2018[7], "2019": y2019[7]},
+                    {"month": "sep", "2016": y2016[8], "2017": y2017[8], "2018": y2018[8], "2019": y2019[8]},
+                    {"month": "oct", "2016": y2016[9], "2017": y2017[9], "2018": y2018[9], "2019": y2019[9]},
+                    {"month": "nov", "2016": y2016[10], "2017": y2017[10], "2018": y2018[10], "2019": y2019[10]},
+                    {"month": "dec", "2016": y2016[11], "2017": y2017[11], "2018": y2018[11], "2019": y2019[11]}
+                ]
 
-            // LINE CHART
-            // -------------------- Scaling -----------------------//
-            var x = d3.scaleTime()
-                .rangeRound([0, width]);
-            var y = d3.scaleLinear()
-                .rangeRound([height, 0]);
+                // -------------------- Scaling -----------------------//
+                var x = d3.scaleTime()
+                    .rangeRound([0, width]);
+                var y = d3.scaleLinear()
+                    .rangeRound([height, 0]);
 
-            // -------------------- AXES ------------------------//
-            var xFormat = "%b";
-            var parser = d3.timeParse("%b")
-        
-            x.domain(d3.extent(priceDict, function(d) { return parser(d.month); }));
-            y.domain([d3.min(priceDict, function(d) {
-                return Math.min(d.prices[0], d.prices[1], d.prices[2], d.prices[3]) - 0.1;
-            }), d3.max(priceDict, function(d) { 
-                  return Math.max(d.prices[0], d.prices[1], d.prices[2], d.prices[3]);
-              })]);
+                // Shape the data
+                var xFormat = "%b";
+                var parser = d3.timeParse("%b")
 
-            var line1 = d3.line()
-                .x(function(d) { return x(parser(d.month)); })
-                .y(function(d) { return y(d.prices[0]); }) 
-                .curve(d3.curveMonotoneX)
-            
-            var line2 = d3.line()
-                .x(function(d) { return x(parser(d.month)); })
-                .y(function(d) { return y(d.prices[1]); }) 
-                .curve(d3.curveMonotoneX)
-                        
-            var line3 = d3.line()
-                .x(function(d) { return x(parser(d.month)); })
-                .y(function(d) { return y(d.prices[2]); }) 
-                .curve(d3.curveMonotoneX)
-            
-            var line4 = d3.line()
-                .x(function(d) { return x(parser(d.month)); })
-                .y(function(d) { return y(d.prices[3]); }) 
-                .curve(d3.curveMonotoneX)
 
-            // Append x axis
-            lineChart.append("g")
-                .attr("class", "x axis")
-                .attr("transform", "translate(0," + height + ")")
-                .call(d3.axisBottom(x).tickFormat(d3.timeFormat(xFormat)));
-            
-            // Append y axis
-            lineChart.append("g")
-                .attr("class", "y axis")
-                .call(d3.axisLeft(y));
+                var color = d3.scaleOrdinal(d3.schemeTableau10);
+                color.domain(d3.keys(priceDict[0]).filter(function(key) {
+                    return key !== 'month'
+                }));
 
-            // 2016
-            var line16 = lineChart.append("path")
-                .datum(priceDict)
-                .attr("class", "line")
-                .attr("id", "sixteen")
-                .attr("d", line1)  
+                var prices = color.domain().map(function(name) {
+                    return {
+                        name: name,
+                        values: priceDict.map(function(d) {
+                            return {
+                                date: d.month,
+                                price: +d[name]
+                            };
+                        })
+                    };
+                });
 
-            // 2017
-            var line17 = lineChart.append("path")
-                .datum(priceDict)
-                .attr("class", "line")
-                .attr("id", "seventeen")
-                .attr("d", line2)  
+                // --------------- DOMAINS ------------------ // 
+                x.domain(d3.extent(priceDict, function(d) {
+                    return parser(d.month);
+                }));
+                y.domain([
+                    d3.min(prices, function(c) {
+                        return d3.min(c.values, function(v) {
+                            return v.price;
+                        });
+                    }) - 0.1,
+                    d3.max(prices, function(c) {
+                        return d3.max(c.values, function(v) {
+                            return v.price;
+                        });
+                    })
+                ]);
 
-            // 2018
-            var line18 = lineChart.append("path")
-                .datum(priceDict)
-                .attr("class", "line")
-                .attr("id", "eighteen")
-                .attr("d", line3) 
-            
-            // 2019
-            var line19 = lineChart.append("path")
-                .datum(priceDict)
-                .attr("class", "line")
-                .attr("id", "nineteen")
-                .attr("d", line4)   
+                // Drawing the lines
+                var line = d3.line()
+                    .x(function(d) {
+                        return x(parser(d.date));
+                    })
+                    .y(function(d) {
+                    return y(d.price);
+                    })
+                    .curve(d3.curveMonotoneX);
+                    
+                var price = lineChart.selectAll(".price")
+                    .data(prices)
+                    .enter().append("g")
+                    .attr("class", "price");
+
+                price.append("path")
+                    .attr("class", "line")
+                    .attr("d", function(d) {
+                    return line(d.values);
+                    })
+                    .style("stroke", function(d) {
+                    return color(d.name);
+                    });
+
+                // Append x axis
+                lineChart.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(d3.axisBottom(x).tickFormat(d3.timeFormat(xFormat)));
+                
+                // Append y axis
+                lineChart.append("g")
+                    .attr("class", "y axis")
+                    .call(d3.axisLeft(y)); 
+
+                // Adding dots for price point
+                price.append("g").selectAll("circle")
+                    .data(function(d){ return d.values })
+                    .enter()
+                    .append("circle")
+                    .attr("r", 2)
+                    .attr("cx", function(dd){ return x(parser(dd.date))})
+                    .attr("cy", function(dd){ return y(dd.price) })
+                    .attr("fill", "none")
+                    .attr("stroke", function(d){return color(this.parentNode.__data__.name)});
+
+                // Adding label to end of each line
+                price.append("text")
+                    .attr("class", "label")
+                    .datum(function (d) {
+                        return {
+                            name: d.name,
+                            value: d.values[d.values.length - 1]
+                        };
+                    })
+                    .attr("transform", function (d) {
+                        return "translate(" + x(parser(d.value.date)) + "," + y(d.value.price) + ")";
+                    })
+                    .attr("x", 3)
+                    .attr("dy", ".35em")
+                    .attr("font-size", "15px")
+                    .text(function (d) {
+                        return d.name;
+                });
+
+                // Add mouse line
+                var mouseG = lineChart.append("g")
+                .attr("class", "mouse-over-effects");
+
+                mouseG.append("path")
+                .attr("class", "mouse-line")
+                .style("stroke", "black")
+                .style("stroke-width", "1px")
+                .style("opacity", "0");
+
+                var lines = document.getElementsByClassName('line');
+
+                var mousePerLine = mouseG.selectAll('.mouse-per-line')
+                    .data(prices)
+                    .enter()
+                    .append("g")
+                    .attr("class", "mouse-per-line");
+
+                    mousePerLine.append("circle")
+                    .attr("r", 7)
+                    .style("stroke", function (d) {
+                        return color(d.name);
+                    })
+                    .style("fill", "none")
+                    .style("stroke-width", "2px")
+                    .style("opacity", "0");
+
+                    mousePerLine.append("text")
+                        .attr("class", "hover-text")
+                        .attr("dy", "-1em")
+                        .attr("transform", "translate(10,3)");
+
+                // Append a rect to catch mouse movements on canvas
+                mouseG.append('svg:rect') 
+                .attr('width', width) 
+                .attr('height', height)
+                .attr('fill', 'none')
+                .attr('pointer-events', 'all')
+                .on('mouseout', function () { // on mouse out hide line, circles and text
+                    d3.select(".mouse-line")
+                    .style("opacity", "0");
+                    d3.selectAll(".mouse-per-line circle")
+                    .style("opacity", "0");
+                    d3.selectAll(".mouse-per-line text")
+                    .style("opacity", "0");
+                })
+                .on('mouseover', function () { // on mouse in show line, circles and text
+                    d3.select(".mouse-line")
+                    .style("opacity", "1");
+                    d3.selectAll(".mouse-per-line circle")
+                    .style("opacity", "1");
+                    d3.selectAll(".mouse-per-line text")
+                    .style("opacity", "1");
+                })
+                .on('mousemove', function () { // mouse moving over canvas
+                    var mouse = d3.mouse(this);
+
+                    d3.selectAll(".mouse-per-line")
+                    .attr("transform", function (d, i) {
+                        var xDate = x.invert(mouse[0]),
+                        bisect = d3.bisector(function (d) { return parser(d.date); }).left;
+                        idx = bisect(d.values, xDate);
+
+                        d3.select(this).select('text')
+                        .text(y.invert(y(d.values[idx].worth)).toFixed(2));
+
+                        d3.select(".mouse-line")
+                        .attr("d", function () {
+                            var data = "M" + x(parser(d.values[idx].date)) + "," + height;
+                            data += " " + x(parser(d.values[idx].date)) + "," + 0;
+                            return data;
+                        });
+                        return "translate(" + x(parser(d.values[idx].date)) + "," + y(d.values[idx].worth) + ")";
+                    });
+                });
+            }
         }
     
         
