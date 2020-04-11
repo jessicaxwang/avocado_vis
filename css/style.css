@@ -36,5 +36,30 @@ html, body {
     stroke: #fff;
 }
 
+#sixteen {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 3;
+}
+
+#seventeen {
+    fill: none;
+    stroke: #6C8F32;
+    stroke-width: 3;
+}
+
+#eighteen {
+    fill: none;
+    stroke: #558303;
+    stroke-width: 3;
+}
+
+
+#nineteen {
+    fill: none;
+    stroke: #356211;
+    stroke-width: 3;
+}
+
 
 
