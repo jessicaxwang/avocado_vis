@@ -264,7 +264,6 @@
                 })
                 .on('mousemove', function () { // mouse moving over canvas
                     var mouse = d3.mouse(this);
-
                     d3.selectAll(".mouse-per-line")
                     .attr("transform", function (d, i) {
                         var xDate = x.invert(mouse[0]),
@@ -272,7 +271,7 @@
                         idx = bisect(d.values, xDate);
 
                         d3.select(this).select('text')
-                        .text(y.invert(y(d.values[idx].worth)).toFixed(2));
+                        .text(y.invert(y(d.values[idx].price)).toFixed(2));
 
                         d3.select(".mouse-line")
                         .attr("d", function () {
@@ -280,7 +279,7 @@
                             data += " " + x(parser(d.values[idx].date)) + "," + 0;
                             return data;
                         });
-                        return "translate(" + x(parser(d.values[idx].date)) + "," + y(d.values[idx].worth) + ")";
+                        return "translate(" + x(parser(d.values[idx].date)) + "," + y(d.values[idx].price) + ")";
                     });
                 });
             }
