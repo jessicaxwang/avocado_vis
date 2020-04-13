@@ -11,7 +11,9 @@
 </head>
 <body>
     <div id='map'></div>
-    <div id='lineChart'></div>
+    <div id='lineChart'>
+        <div id ='regionDropdown'></div>
+    </div>
     <div id='barChart'></div>
     <script>
         var chartDiv = document.getElementById('map')        
@@ -46,7 +48,7 @@
         // Create line chart
         var margin = {left: 50, right: 50, top: 50, bottom: 50};
         var width = pageWidth / 2.5 ; 
-        var height = pageHeight;
+        var height = pageHeight / 1.3;
 
         var lineChart = d3.select("#lineChart").append("svg")
             .attr("width", width + margin.left + margin.right)
@@ -54,28 +56,31 @@
         .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-
-        // Shaping the data
-        // d3.csv('./totalAvocado_v5.csv', function(d){
-        //     return {
-        //         week: d.Date,
-        //         year: d.year,
-        //         avgPrice: +d.AveragePrice,
-        //         region: d.region,
-        //         totalVolume: +d["Total Volume"],
-        //         type: d.type
-        //     };
-        // }, function(error, rows) {
-        //     process(rows)
-        // });
-
+        // Region prices: key: [region, year]; val: [monthly $...12]
         var regionPrices = d3.map()
         d3.csv('./avgAvocado.csv', function(d) {
             avgPrices = [d.jan, d.feb, d.mar, d.apr, d.may, d.jun, d.jul, d.aug, d.sep, d.oct, d.nov, d.dec]
             regionPrices.set([d.region, d.year], avgPrices)
         }, function (error, rows) {
+            // Add dropdown menu
+            var regionMenu = d3.select("#regionDropdown")
+                    .append("select")
+                    .selectAll("option")
+                    .data(regionPrices)
+                    .enter()
+                    .append("option")
+                    .attr("value", function(d){
+                        console.log(d)
+                        return d.date
+                    })
+                    .text(function(d){
+                        console.log(d)
+                        return d.key[0];
+                    })
+
             processLineChart(rows, "Albany")
             // Button handling here
+
         });
 
         function processLineChart(data, region) {
@@ -134,8 +139,6 @@
                         })
                     };
                 });
-
-                console.log(prices)
 
                 // --------------- DOMAINS ------------------ // 
                 x.domain(d3.extent(priceDict, function(d) {
