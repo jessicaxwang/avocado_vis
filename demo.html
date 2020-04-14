@@ -300,23 +300,54 @@
                 .attr("stroke", function(d){return color(this.parentNode.__data__.name)});
 
             // Adding label to end of each line
-            price.append("text")
-                .attr("class", "label")
+            // price.append("text")
+            //     .attr("class", "label")
+            //     .datum(function (d) {
+            //         return {
+            //             name: d.name,
+            //             value: d.values[d.values.length - 1]
+            //         };
+            //     })
+            //     .attr("transform", function (d) {
+            //         return "translate(" + x(parser(d.value.date)) + "," + y(d.value.price) + ")";
+            //     })
+            //     .attr("x", 3)
+            //     .attr("dy", ".35em")
+            //     .attr("font-size", "15px")
+            //     .text(function (d) {
+            //         return d.name;
+            // });
+
+            // Add a legend for each line
+            // var legend = lineChart.selectAll('g')
+            //     .data(prices)
+            //     .enter().append('g')
+            //     .attr('class', 'legend');
+
+            var legend = price.append('circle')
+                .attr('class', 'legend')
                 .datum(function (d) {
                     return {
                         name: d.name,
                         value: d.values[d.values.length - 1]
-                    };
+                    }
                 })
-                .attr("transform", function (d) {
-                    return "translate(" + x(parser(d.value.date)) + "," + y(d.value.price) + ")";
+                .attr("cx", lineChartWidth - 100)
+                .attr("cy", function(d,i){ return i * 20; }) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("r", 5)
+                .style("fill", function(d){ return color(d.name)})
+
+                price.append('text')
+                .attr('x', lineChartWidth - 90)
+                .attr('y', function(d, i) {
+                    return (i * 20);
                 })
-                .attr("x", 3)
-                .attr("dy", ".35em")
-                .attr("font-size", "15px")
-                .text(function (d) {
+                .text(function(d) {
                     return d.name;
-            });
+                })
+                .attr("dy", ".35em")
+                .attr("font-size", "11px")
+                .style("fill", function(d){ return color(d.name)});
 
             // Add mouse line
             lineChart.selectAll(".mouse-over-effects").remove();
