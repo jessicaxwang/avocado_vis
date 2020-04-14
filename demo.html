@@ -114,7 +114,7 @@
             return true;
         }
                     
-// ------------------------------------------------------ //
+// ------------------------------------------- LINE CHART -------------------------------------------- //
 
         var regionPrices = d3.map()
         d3.csv('./avgAvocado.csv', function(d) {
@@ -188,7 +188,7 @@
                     .attr('text-anchor', 'middle') 
                     .attr('id', 'title') 
                     .style('font-size', '16px')
-                    .text("Test")
+                    .text("🥑Average Monthly Prices (" + year + ")🥑")
             
             // -------------------- Scaling -----------------------//
             x = d3.scaleTime()
@@ -298,31 +298,6 @@
                 .attr("cy", function(dd){ return y(dd.price) })
                 .attr("fill", "none")
                 .attr("stroke", function(d){return color(this.parentNode.__data__.name)});
-
-            // Adding label to end of each line
-            // price.append("text")
-            //     .attr("class", "label")
-            //     .datum(function (d) {
-            //         return {
-            //             name: d.name,
-            //             value: d.values[d.values.length - 1]
-            //         };
-            //     })
-            //     .attr("transform", function (d) {
-            //         return "translate(" + x(parser(d.value.date)) + "," + y(d.value.price) + ")";
-            //     })
-            //     .attr("x", 3)
-            //     .attr("dy", ".35em")
-            //     .attr("font-size", "15px")
-            //     .text(function (d) {
-            //         return d.name;
-            // });
-
-            // Add a legend for each line
-            // var legend = lineChart.selectAll('g')
-            //     .data(prices)
-            //     .enter().append('g')
-            //     .attr('class', 'legend');
 
             var legend = price.append('circle')
                 .attr('class', 'legend')
