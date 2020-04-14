@@ -241,15 +241,15 @@
                 .call(d3.axisLeft(y));
 
             // Adding dots for price point
-            // price.append("g").selectAll("circle")
-            //     .data(function(d){ return d.values })
-            //     .enter()
-            //     .append("circle")
-            //     .attr("r", 2)
-            //     .attr("cx", function(dd){ return x(parser(dd.date))})
-            //     .attr("cy", function(dd){ return y(dd.price) })
-            //     .attr("fill", "none")
-            //     .attr("stroke", function(d){return color(this.parentNode.__data__.name)});
+            price.append("g").selectAll("circle")
+                .data(function(d){ return d.values })
+                .enter()
+                .append("circle")
+                .attr("r", 2)
+                .attr("cx", function(dd){ return x(parser(dd.date))})
+                .attr("cy", function(dd){ return y(dd.price) })
+                .attr("fill", "none")
+                .attr("stroke", function(d){return color(this.parentNode.__data__.name)});
 
             // Adding label to end of each line
             price.append("text")
@@ -368,8 +368,6 @@
                 };
             });
 
-            console.log(prices)
-
             // Update y domain
             y.domain([
                 d3.min(prices, function(c) {
@@ -384,7 +382,7 @@
                 })
             ]);
 
-            // Clear and redraw price lines
+            // ------------------ Clear and redraw price lines -------------------------
             var price = lineChart.selectAll(".price")
             price.selectAll("g > *").remove(); // Remove all g elements in price
 
@@ -401,13 +399,104 @@
                     return color(d.name);
                 });
             
+            // -------------------- Redraw dots --------------------------------------------------
+            price.append("g").selectAll("circle")
+                .data(function(d){ return d.values })
+                .enter()
+                .append("circle")
+                .attr("r", 2)
+                .attr("cx", function(dd){ return x(parser(dd.date))})
+                .attr("cy", function(dd){ return y(dd.price) })
+                .attr("fill", "none")
+                .attr("stroke", function(d){return color(this.parentNode.__data__.name)});
+
+            // -------------------- Redraw line with price marker -------------------------------
+            var mouseOverEffects = lineChart.selectAll(".mouse-over-effects")
+            mouseOverEffects.selectAll("g > *").remove();
+            var mouseG = lineChart.append("g")
+                .attr("class", "mouse-over-effects");
+
+            mouseG.append("path")
+            .attr("class", "mouse-line")
+            .style("stroke", "black")
+            .style("stroke-width", "1px")
+            .style("opacity", "0");
+
+            var mousePerLine = mouseG.selectAll('.mouse-per-line')
+            mousePerLine.selectAll("g > *").remove();
+            mousePerLine.selectAll("circle").remove();
+            mousePerLine.selectAll("text").remove();
+
+            var lines = document.getElementsByClassName('line');
+            
+            mousePerLine.data(prices)
+                .enter()
+                .append("g")
+                .attr("class", "mouse-per-line");
+
+            mousePerLine.append("circle")
+            .attr("r", 7)
+            .style("stroke", function (d) {
+                console.log(d)
+                return color(d.name);
+            })
+            .style("fill", "none")
+            .style("stroke-width", "2px")
+            .style("opacity", "0");
+
+            mousePerLine.append("text")
+                .attr("class", "hover-text")
+                .attr("dy", "-1em")
+                .attr("transform", "translate(10,3)");
+                
+            // Append a rect to catch mouse movements on canvas
+            mouseG.append('svg:rect') 
+            .attr('width', lineChartWidth) 
+            .attr('height', lineChartHeight)
+            .attr('fill', 'none')
+            .attr('pointer-events', 'all')
+            .on('mouseout', function () { // on mouse out hide line, circles and text
+                d3.select(".mouse-line")
+                .style("opacity", "0");
+                d3.selectAll(".mouse-per-line circle")
+                .style("opacity", "0");
+                d3.selectAll(".mouse-per-line text")
+                .style("opacity", "0");
+            })
+            .on('mouseover', function () { // on mouse in show line, circles and text
+                d3.select(".mouse-line")
+                .style("opacity", "1");
+                d3.selectAll(".mouse-per-line circle")
+                .style("opacity", "1");
+                d3.selectAll(".mouse-per-line text")
+                .style("opacity", "1");
+            })
+            .on('mousemove', function () { // mouse moving over canvas
+                var mouse = d3.mouse(this);
+                d3.selectAll(".mouse-per-line")
+                .attr("transform", function (d, i) {
+                    var xDate = x.invert(mouse[0]),
+                    bisect = d3.bisector(function (d) { return parser(d.date); }).left;
+                    idx = bisect(d.values, xDate);
+
+                    d3.select(this).select('text')
+                    .text("$" + (y.invert(y(d.values[idx].price)).toFixed(2)));
+
+                    d3.select(".mouse-line")
+                    .attr("d", function () {
+                        var data = "M" + x(parser(d.values[idx].date)) + "," + lineChartHeight;
+                        data += " " + x(parser(d.values[idx].date)) + "," + 0;
+                        return data;
+                    });
+                    return "translate(" + x(parser(d.values[idx].date)) + "," + y(d.values[idx].price) + ")";
+                });
+            });
 
             // Update y axis
             lineChart.selectAll(".y.axis")
                 .transition()
                 .duration(750)
                 .call(d3.axisLeft(y));
-            
         }
 
     </script>
