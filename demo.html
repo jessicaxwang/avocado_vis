@@ -45,9 +45,6 @@
         .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-<<<<<<< HEAD
-        // Region prices: key: [region, year]; val: [monthly $...12]
-=======
 
         // Shaping the data
         // d3.csv('./totalAvocado_v5.csv', function(d){
@@ -117,7 +114,6 @@
                     
 // ------------------------------------------------------ //
 
->>>>>>> f13e26456652562c697fd2410649ebb890c9d2d0
         var regionPrices = d3.map()
         d3.csv('./avgAvocado.csv', function(d) {
             avgPrices = [d.jan, d.feb, d.mar, d.apr, d.may, d.jun, d.jul, d.aug, d.sep, d.oct, d.nov, d.dec]
