@@ -13,11 +13,15 @@
     <div id='map'></div>
     <div id='lineChart'>
         <div id ='regionDropdown'></div>
+        <div id ='yearDropdown'></div>
     </div>
     <div id='barChart'></div>
     <script>
         var noneSelected = true;
+        var currYear = 2019;
         var priceDict = [];
+        var regionMenu = d3.select("#regionDropdown")
+        var yearMenu = d3.select('#yearDropdown')
         var chartDiv = document.getElementById('map')        
         var pageWidth = window.innerWidth;
         var pageHeight = window.innerHeight;
@@ -89,9 +93,9 @@
                     .style('stroke-width', 0)
                     // .on('mouseover', function(d){ d3.select(this).attr('height', 100)})
                     // .on('mouseout', function (d) { d3.select(this).attr('height', 20)})
-                    .on('mouseover', function(d){ d3.select(this).attr('r', 12)})
+                    .on('mouseover', function(d){ d3.select(this).attr('r', 12) })
                     .on('mouseout', function (d) { d3.select(this).attr('r', 8)})
-                    .on('click', function(d) { ;
+                    .on('click', function (d) {
                         if (selectedCities[d.region]){
                             d3.select(this).style('stroke-width', 0)
                         } else {
@@ -101,9 +105,54 @@
                         if (noCitiesSelected()) {
                             noneSelected = true;
                         }
-                        updateLineChart(2019, true)
+                        updateLineChart(false)
                     })
-            })
+                
+                    // // Initialize region menu
+                    // regionMenu.append("select")
+                    //     .selectAll('option')
+                    //         .data(d3.keys(selectedCities).sort())
+                    //         .enter()
+                    //         .append('option')
+                    //     .text(function (d) { 
+                    //         return d; 
+                    //     })
+                    //     .attr("value", function (d) { 
+                    //         return d; 
+                    //     })
+                    
+                    // regionMenu.on("change", function(d) {
+                    //     var val = d3.select(this)
+                    //         .select("select")
+                    //         .property("value");
+                    //     selectedCities[val] = true;
+                    //     updateLineChart(false)
+                    // })
+
+                    // Initialize year menu
+                    yearMenu.append("select")
+                        .selectAll('option')
+                            .data([2019, 2018, 2017, 2016])
+                            .enter()
+                            .append('option')
+                        .text(function (d) { 
+                            return d; 
+                        })
+                        .attr("value", function (d) { 
+                            return d; 
+                    })
+
+                    yearMenu.on("change", function(d) {
+                        var val = d3.select(this)
+                            .select("select")
+                            .property("value");
+                            currYear = val;
+                        if (noCitiesSelected()) {
+                            noneSelected = true;
+                        }
+                        updateLineChart(false);
+                    })
+                })
         }
 
         function noCitiesSelected() {
@@ -112,8 +161,7 @@
                     return false;
             }
             return true;
-        }
-                    
+        }   
 // ------------------------------------------- LINE CHART -------------------------------------------- //
 
         var regionPrices = d3.map()
@@ -122,25 +170,11 @@
             regionPrices.set([d.region, d.year], avgPrices)
         }, function (error, rows) {
             // Initialize the line chart
-            updateLineChart(2019, false);
-            // Initializing dropdown menu
-            d3.select("#regionDropdown")
-                .append("select")
-                .selectAll('option')
-                    .data(regionPrices)
-                    .enter()
-                    .append('option')
-                .text(function (d) { 
-                    console.log(d); 
-                    return d.key()[0]; }) // text showed in the menu
-                .attr("value", function (d) { 
-                    console.log(d);
-                    return d; }) // corresponding value returned by the button
-
+            updateLineChart(true);
         });
 
         var months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
-        function makePriceDict(year) {
+        function makePriceDict() {
             priceDict = [{"month": "jan"},
                 {"month": "feb"},
                 {"month": "mar"},
@@ -155,7 +189,7 @@
                 {"month": "dec"}]
 
             if (noneSelected) {
-                var pricePerRegion = regionPrices.get(["Total U.S.", year]);
+                var pricePerRegion = regionPrices.get(["Total U.S.", currYear]);
                 priceDict.forEach(function (monthObj) {
                         monthObj["Total U.S."] = pricePerRegion[months.indexOf(monthObj.month)];
                 })
@@ -163,7 +197,7 @@
             } else {
                 d3.keys(selectedCities).forEach(function (d) {
                     if (selectedCities[d]) {
-                        var pricePerRegion = regionPrices.get([d, year]);
+                        var pricePerRegion = regionPrices.get([d, currYear]);
                         priceDict.forEach(function (monthObj) {
                             monthObj[d] = pricePerRegion[months.indexOf(monthObj.month)];
                         })
@@ -172,14 +206,9 @@
             }
         }
 
-        d3.select("#regionDropdown").on("change", function(d) {
-            var selectedOption = d3.select(this).property("value")
-            updateLineChart(selectedOption)
-        })
-
-        function updateLineChart(year, clicked) {
+        function updateLineChart(init) {
             // Getting new data    
-            makePriceDict(year);            
+            makePriceDict(currYear);            
             // New title
             lineChart.select("#title").remove();
             lineChart.append("text")
@@ -188,7 +217,7 @@
                     .attr('text-anchor', 'middle') 
                     .attr('id', 'title') 
                     .style('font-size', '16px')
-                    .text("🥑Average Monthly Prices (" + year + ")🥑")
+                    .text("🥑Average Monthly Prices (" + currYear + ")🥑")
             
             // -------------------- Scaling -----------------------//
             x = d3.scaleTime()
@@ -196,7 +225,7 @@
             y = d3.scaleLinear()
                 .rangeRound([lineChartHeight, 0]);
 
-            color = d3.scaleOrdinal(d3.schemeTableau10);
+            color = d3.scaleOrdinal(d3.schemeCategory10);
             color.domain(d3.keys(priceDict[0]).filter(function(key) {
                 return key !== 'month'
             }));
@@ -240,10 +269,8 @@
                     return y(d.price);
                 })
                 .curve(d3.curveMonotoneX);
-            
-            console.log(prices)
 
-            if (clicked) {
+            if (!init) {
                 d3.selectAll(".price").remove(); // Remove all elements in price
             }
             price = lineChart.selectAll(".price")
@@ -255,7 +282,6 @@
             price.append("path")
                 .attr("class", "line")
                 .attr("d", function(d) {
-                    console.log(d)
                     return line(d.values);
                 })
                 .style("stroke", function(d) {
@@ -263,14 +289,14 @@
                 });
             
             // Append x axis
-            if (!clicked) {
+            if (init) {
                 lineChart.append("g")
                     .attr("class", "x axis")
                     .attr("transform", "translate(0," + lineChartHeight + ")")
                     .call(d3.axisBottom(x).tickFormat(d3.timeFormat(xFormat)));
             }
             // Append y axis
-            if (!clicked) {
+            if (init) {
                 lineChart.append("g")
                     .attr("class", "y axis")
                     .call(d3.axisLeft(y))
@@ -308,7 +334,7 @@
                     }
                 })
                 .attr("cx", lineChartWidth - 100)
-                .attr("cy", function(d,i){ return i * 20; }) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("cy", function(d,i){ return i * 20; })
                 .attr("r", 5)
                 .style("fill", function(d){ return color(d.name)})
 
