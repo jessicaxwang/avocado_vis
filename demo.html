@@ -48,7 +48,6 @@
         var xFormat = "%b";
         var parser = d3.timeParse("%b")
 
-
 // ------------- CREATE AND POPULATE MAP ------------- //
         d3.csv('./regionLatLong.csv', function(d){
             return{
@@ -109,26 +108,22 @@
             avgPrices = [d.jan, d.feb, d.mar, d.apr, d.may, d.jun, d.jul, d.aug, d.sep, d.oct, d.nov, d.dec]
             regionPrices.set([d.region, d.year], avgPrices)
         }, function (error, rows) {
-            // Add dropdown menu
-            var regionMenu = d3.select("#regionDropdown")
-                    .append("select")
-                    .selectAll("option")
+            // Initialize the line chart
+            updateLineChart("Albany", false);
+            // Initializing dropdown menu
+            console.log(regionPrices)
+            d3.select("#regionDropdown")
+                .append("select")
+                .selectAll('option')
                     .data(regionPrices)
                     .enter()
-                    .append("option")
-                    .attr("value", function(d){
-                        console.log(d)
-                        return d.date
-                    })
-                    .text(function(d){
-                        console.log(d)
-                        return d.key[0];
-                    })
-
-            updateLineChart("Albany", false);
-            
-
-            // Button handling here
+                    .append('option')
+                .text(function (d) { 
+                    console.log(d); 
+                    return d.key()[0]; }) // text showed in the menu
+                .attr("value", function (d) { 
+                    console.log(d);
+                    return d; }) // corresponding value returned by the button
 
         });
 
@@ -152,6 +147,11 @@
                 {"month": "dec", "2016": y2016[11], "2017": y2017[11], "2018": y2018[11], "2019": y2019[11]}
             ]
         }
+
+        d3.select("#regionDropdown").on("change", function(d) {
+            var selectedOption = d3.select(this).property("value")
+            updateLineChart(selectedOption)
+        })
 
         function updateLineChart(region, clicked) {
             var priceDict = makePriceDict(region);
@@ -189,7 +189,6 @@
                 };
             });
 
-            console.log(prices);
             // --------------- DOMAINS ------------------ // 
             x.domain(d3.extent(priceDict, function(d) {
                 return parser(d.month);
@@ -218,12 +217,19 @@
                 })
                 .curve(d3.curveMonotoneX);
                 
-            price = lineChart.selectAll(".price")
-            price.selectAll("g > *").remove(); // Remove all g elements in price
-            price.data(prices)
-                .enter().append("g")
-                .attr("class", "price");
+            if (clicked) {
+                price = lineChart.selectAll(".price").data(prices)
+                price.selectAll("g > *").remove(); // Remove all g elements in price
+                price.enter().append("g")
+                    .attr("class", "price");
+            } else {
+                price = lineChart.selectAll(".price")
+                    .data(prices)
+                    .enter().append("g")
+                    .attr("class", "price");
+            }
 
+            // Add lines
             price.append("path")
                 .attr("class", "line")
                 .attr("d", function(d) {
@@ -233,6 +239,8 @@
                 .style("stroke", function(d) {
                     return color(d.name);
                 });
+            
+            price.selectAll(".line").transition().duration(750)
 
             // Append x axis
             lineChart.append("g")
