@@ -9,9 +9,19 @@ html, body {
     stroke: #fff;
 }
 
-#lineChart {
-    float: left;
+#map {
+	height: 100%;
+	width: calc(50% - 3px);
+	float: left;
+	border-right: 1px solid gray;
     background-color: #bae8c0;
+}
+
+#lineChart {
+	height: 100%;
+	width: 50%;
+    background-color: #bae8c0;
+	display: inline-block;
 }
 
 #barChart {
