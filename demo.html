@@ -48,7 +48,8 @@
 
         var lineChart = d3.select("#lineChart").append("svg")
             .attr('height', pageHeight)
-            .attr("width", lineChartWidth + margin.left + margin.right)
+            .attr('width', pageWidth/2)
+            // .attr("width", lineChartWidth + margin.left + margin.right)
             // .attr("height", lineChartHeight + margin.top + margin.bottom)
         .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -59,7 +60,6 @@
         
         var xFormat = "%b";
         var parser = d3.timeParse("%b")
-// test
 
 // ------------- CREATE AND POPULATE MAP ------------- //
         d3.csv('./regionLatLong.csv', function(d){
