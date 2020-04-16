@@ -29,6 +29,23 @@
         var backgroundColor = "#bae8c0";
         var totalMap = d3.map();
     
+
+        regionColors = {}
+        var regionNames = ["Albany", "Atlanta", "Baltimore/Washington", "Boise", "Boston", "Buffalo/Rochester", 
+        "Charlotte", "Chicago", "Cincinnati/Dayton", "Columbus", "Dallas/Ft. Worth", "Denver", "Detroit", 
+        "Grand Rapids", "Harrisburg/Scranton", "Hartford/Springfield", "Houston", "Indianapolis", "Jacksonville", 
+        "Las Vegas", "Los Angeles", "Louisville", "Miami/Ft. Lauderdale", "Nashville", "New Orleans/Mobile", 
+        "New York", "Orlando", "Philadelphia", "Phoenix/Tucson", "Pittsburgh", "Portland", "Raleigh/Greensboro", 
+        "Richmond/Norfolk", "Roanoke", "Sacramento", "San Diego", "San Francisco", "Seattle", "Spokane", "St. Louis",
+         "Syracuse", "Tampa"]
+        var interval = Math.floor(parseInt('fffffe', 16)/44)
+        var current = 0
+        for (const [index, element] of regionNames.entries()){
+            regionColors[element] = current.toString(16)
+            current = current + interval
+        }
+        regionColors['Total U.S.'] = "#ffffff"
+
         d3.select("body").style("background-color", backgroundColor);
     
         // Create Map
@@ -83,6 +100,7 @@
                     .attr("d", path);
 
                 data.forEach(function(d){ selectedCities[d.region] = false })
+
                 var imgWidth = 25
                 var imgHeight = 25
                 mapSvg.selectAll('img')
@@ -238,6 +256,10 @@
             }
         }
 
+        function lineColor(region){
+            return regionColors[region]
+        }
+
         function updateLineChart(init) {
             // Getting new data    
             makePriceDict(currYear);            
@@ -319,7 +341,8 @@
                     return line(d.values);
                 })
                 .style("stroke", function(d) {
-                    return color(d.name);
+                    // return color(d.name);
+                    return lineColor(d.name)
                 });
             
             // Append x axis
@@ -357,7 +380,7 @@
                 .attr("cx", function(dd){ return x(parser(dd.date))})
                 .attr("cy", function(dd){ return y(dd.price) })
                 .attr("fill", "none")
-                .attr("stroke", function(d){return color(this.parentNode.__data__.name)});
+                .attr("stroke", function(d){return lineColor(this.parentNode.__data__.name)});
 
             var legend = price.append('circle')
                 .attr('class', 'legend')
@@ -370,7 +393,7 @@
                 .attr("cx", lineChartWidth - 100)
                 .attr("cy", function(d,i){ return i * 20; })
                 .attr("r", 5)
-                .style("fill", function(d){ return color(d.name)})
+                .style("fill", function(d){ return lineColor(d.name)})
 
                 price.append('text')
                 .attr('x', lineChartWidth - 90)
@@ -382,7 +405,7 @@
                 })
                 .attr("dy", ".35em")
                 .attr("font-size", "11px")
-                .style("fill", function(d){ return color(d.name)});
+                .style("fill", function(d){ return lineColor(d.name)});
 
             // Add mouse line
             lineChart.selectAll(".mouse-over-effects").remove();
@@ -406,7 +429,7 @@
                 mousePerLine.append("circle")
                 .attr("r", 7)
                 .style("stroke", function (d) {
-                    return color(d.name);
+                    return lineColor(d.name);
                 })
                 .style("fill", "none")
                 .style("stroke-width", "2px")
