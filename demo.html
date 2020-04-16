@@ -75,7 +75,6 @@
             var mapSvg = d3.select('#map').append('svg')
             .attr('width', pageWidth /2)
             .attr('height', pageHeight)
-            // .style('background-color', divColor);
     
             d3.json("js/us.json", function(error, us){
                 mapSvg.append("path")
@@ -274,6 +273,8 @@
                     })
                 };
             });
+
+            console.log(prices)
 
             // --------------- DOMAINS ------------------ // 
             x.domain(d3.extent(priceDict, function(d) {
