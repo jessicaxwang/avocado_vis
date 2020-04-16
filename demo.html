@@ -34,7 +34,7 @@
     
         // Create Map
         var projection = d3.geoAlbersUsa()
-            .translate([pageWidth / 2 , pageHeight / 2])
+            .translate([pageWidth / 4 , pageHeight / 2])
             .scale([1000]);
     
         var path = d3.geoPath()
@@ -47,8 +47,9 @@
         var lineChartHeight = pageHeight / 1.3;
 
         var lineChart = d3.select("#lineChart").append("svg")
+            .attr('height', pageHeight)
             .attr("width", lineChartWidth + margin.left + margin.right)
-            .attr("height", lineChartHeight + margin.top + margin.bottom)
+            // .attr("height", lineChartHeight + margin.top + margin.bottom)
         .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -58,6 +59,7 @@
         
         var xFormat = "%b";
         var parser = d3.timeParse("%b")
+// test
 
 // ------------- CREATE AND POPULATE MAP ------------- //
         d3.csv('./regionLatLong.csv', function(d){
@@ -73,9 +75,9 @@
         selectedCities = {}
         function addCityMarkers(data){
             var mapSvg = d3.select('#map').append('svg')
-            .attr('width', pageWidth)
+            .attr('width', pageWidth /2)
             .attr('height', pageHeight)
-            .style('background-color', divColor);
+            // .style('background-color', divColor);
     
             d3.json("js/us.json", function(error, us){
                 mapSvg.append("path")
