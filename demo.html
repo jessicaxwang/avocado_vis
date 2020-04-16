@@ -35,7 +35,7 @@
         // Create Map
         var projection = d3.geoAlbersUsa()
             .translate([pageWidth / 4 , pageHeight / 2])
-            .scale([1000]);
+            .scale([((pageWidth/2)/792.5) * 1000]);
     
         var path = d3.geoPath()
                     .projection(projection);
