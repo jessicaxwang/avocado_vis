@@ -27,7 +27,7 @@
         var pageWidth = window.innerWidth;
         var pageHeight = window.innerHeight;
         var backgroundColor = "#bae8c0";
-        var regionMap = d3.map();
+        var totalMap = d3.map();
     
         d3.select("body").style("background-color", backgroundColor);
     
@@ -460,6 +460,16 @@
                 });
             });
         }
+    
+    // -------------------------------------------- BAR CHART -------------------------------------------//
+    d3.csv('./avgAvocado.csv', function(d) {
+            avgPrices = [d.jan, d.feb, d.mar, d.apr, d.may, d.jun, d.jul, d.aug, d.sep, d.oct, d.nov, d.dec]
+            regionPrices.set([d.region, d.year], avgPrices)
+        }, function (error, rows) {
+            // Initialize the line chart
+            updateLineChart(true);
+        });
+    
     </script>
 </body>
 
