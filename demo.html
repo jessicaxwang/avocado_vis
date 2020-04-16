@@ -79,27 +79,43 @@
                     .attr("d", path);
 
                 data.forEach(function(d){ selectedCities[d.region] = false })
-                mapSvg.selectAll('circle')
+                var imgWidth = 25
+                var imgHeight = 25
+                mapSvg.selectAll('img')
                     .data(data)
                     .enter()
-                    .append('circle')
-                    // .attr('xlink:href', './avocado.png')
-                    .attr('cx',function(d){ return projection([d.long, d.lat])[0] })
-                    .attr('cy',function(d){ return projection([d.long, d.lat])[1] })
-                    // .attr('width', 20)
-                    // .attr('height', 20)
-                    .attr('r', 8)
-                    .style('stroke', 'yellow')
-                    .style('stroke-width', 0)
-                    // .on('mouseover', function(d){ d3.select(this).attr('height', 100)})
-                    // .on('mouseout', function (d) { d3.select(this).attr('height', 20)})
-                    .on('mouseover', function(d){ d3.select(this).attr('r', 12) })
-                    .on('mouseout', function (d) { d3.select(this).attr('r', 8)})
-                    .on('click', function (d) {
+                    .append('svg:image')
+                    .attr('xlink:href', './avocado.png')
+                    .attr('x',function(d){ return projection([d.long, d.lat])[0] - (imgWidth/2)})
+                    .attr('y',function(d){ return projection([d.long, d.lat])[1] - (imgHeight/2)})
+                    .attr('width', imgWidth)
+                    .attr('height', imgHeight)
+                    .style('borderStyle', 'solid')
+                    .on('mouseover', function(d){ 
+                        imgWidth = 50
+                        imgHeight = 50
+                        d3.select(this)
+                          .attr('x',function(d){ return projection([d.long, d.lat])[0] - (imgWidth/2)})
+                          .attr('y',function(d){ return projection([d.long, d.lat])[1] - (imgHeight/2)})
+                          .attr('width', imgWidth)
+                          .attr('height', imgHeight)
+                    })
+                    .on('mouseout', function (d) { 
+                        imgWidth = 25
+                        imgHeight = 25
+                        d3.select(this)
+                          .attr('x',function(d){ return projection([d.long, d.lat])[0] - (imgWidth/2)})
+                          .attr('y',function(d){ return projection([d.long, d.lat])[1] - (imgHeight/2)})
+                          .attr('width', imgWidth)
+                          .attr('height', imgHeight) 
+                    })
+                    .on('click', function(d) { 
                         if (selectedCities[d.region]){
                             d3.select(this).style('stroke-width', 0)
+                              .attr('xlink:href', './avocado.png')
                         } else {
                             d3.select(this).style('stroke-width', 3)
+                              .attr('xlink:href', './avocadoBorder.png')
                         }
                         selectedCities[d.region] = !selectedCities[d.region]
                         if (noCitiesSelected()) {
