@@ -14,6 +14,7 @@
     <div id='lineChart'>
         <div id ='regionDropdown'></div>
         <div id ='yearDropdown'></div>
+        <div id ='buttonArea'></div>
     </div>
     <div id='barChart'></div>
     <script>
@@ -51,6 +52,10 @@
             // .attr("height", lineChartHeight + margin.top + margin.bottom)
         .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var clearAll = d3.select("#buttonArea").append("button")
+            .text("Clear All")
+            .attr("id", "clearAll")
         
         var xFormat = "%b";
         var parser = d3.timeParse("%b")
@@ -86,6 +91,7 @@
                     .data(data)
                     .enter()
                     .append('svg:image')
+                    .attr("class", "avoIcon")
                     .attr('xlink:href', './avocado.png')
                     .attr('x',function(d){ return projection([d.long, d.lat])[0] - (imgWidth/2)})
                     .attr('y',function(d){ return projection([d.long, d.lat])[1] - (imgHeight/2)})
@@ -125,7 +131,7 @@
                         updateLineChart(false)
                     })
                 
-                    // // Initialize region menu
+                    // Initialize region menu
                     // regionMenu.append("select")
                     //     .selectAll('option')
                     //         .data(d3.keys(selectedCities).sort())
@@ -171,6 +177,17 @@
                     })
                 })
         }
+
+        clearAll.on("click", function() {
+            for(var region in selectedCities) { 
+                selectedCities[region] = false;
+            }
+            noneSelected = true;
+            d3.select('#map').select("svg").selectAll('.avoIcon')
+                .style('stroke-width', 0)
+                .attr('xlink:href', './avocado.png')
+            updateLineChart(false);
+        });
 
         function noCitiesSelected() {
             for(var region in selectedCities) { 
