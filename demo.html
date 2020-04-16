@@ -14,7 +14,7 @@
     <div id='lineChart'>
         <div id ='regionDropdown'></div>
         <div id ='yearDropdown'></div>
-        <div id ='buttonArea'></div>
+        <!-- <div id ='buttonArea'></div> -->
     </div>
     <div id='barChart'></div>
     <script>
@@ -47,13 +47,13 @@
 
         var lineChart = d3.select("#lineChart").append("svg")
             .attr('height', pageHeight)
-            .attr('width', pageWidth/2)
+            .attr('width', pageWidth / 2)
             // .attr("width", lineChartWidth + margin.left + margin.right)
             // .attr("height", lineChartHeight + margin.top + margin.bottom)
         .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        var clearAll = d3.select("#buttonArea").append("button")
+        var clearAll = lineChart.append("rect")
             .text("Clear All")
             .attr("id", "clearAll")
         
