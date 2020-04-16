@@ -12,13 +12,11 @@ html, body {
 #map {
 	width: calc(50% - 3px);
 	float: left;
-	border-right: 1px solid gray;
-    background-color: #bae8c0;
+	/* border-right: 1px solid gray; */
 }
 
 #lineChart {
 	width: 50%;
-    background-color: #bae8c0;
 	display: inline-block;
 }
 

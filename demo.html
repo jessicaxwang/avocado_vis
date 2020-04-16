@@ -14,7 +14,7 @@
     <div id='lineChart'>
         <div id ='regionDropdown'></div>
         <div id ='yearDropdown'></div>
-        <!-- <div id ='buttonArea'></div> -->
+        <div id ='buttonArea'></div>
     </div>
     <div id='barChart'></div>
     <script>
@@ -26,8 +26,7 @@
         var chartDiv = document.getElementById('map')        
         var pageWidth = window.innerWidth;
         var pageHeight = window.innerHeight;
-        var divColor = "#bae8c0";
-        var backgroundColor = "#556e53"
+        var backgroundColor = "#bae8c0";
         var regionMap = d3.map();
     
         d3.select("body").style("background-color", backgroundColor);
@@ -53,7 +52,7 @@
         .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        var clearAll = lineChart.append("rect")
+        var clearAll = d3.select("#buttonArea").append("button")
             .text("Clear All")
             .attr("id", "clearAll")
         
