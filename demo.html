@@ -44,12 +44,15 @@
         "Richmond/Norfolk", "Roanoke", "Sacramento", "San Diego", "San Francisco", "Seattle", "Spokane", "St. Louis",
          "Syracuse", "Tampa"]
         var interval = Math.floor(parseInt('fffffe', 16)/44)
-        var current = 0
+        var current = interval
         for (const [index, element] of regionNames.entries()){
-            regionColors[element] = current.toString(16)
+
+            regionColors[element] = '#'.concat(current.toString(16))
             current = current + interval
         }
         regionColors['Total U.S.'] = "#ffffff"
+        regionColors['Albany'] = '#05d174'
+        regionColors['Atlanta'] = '#0ba2e8'
 
         d3.select("body").style("background-color", backgroundColor);
     
@@ -398,7 +401,9 @@
                 .append("circle")
                 .attr("r", 2)
                 .attr("cx", function(dd){ return x(parser(dd.date))})
-                .attr("cy", function(dd){ return y(dd.price) });
+                .attr("cy", function(dd){ return y(dd.price) })
+                .attr('stroke', function(d){ return (lineColor(this.parentNode.__data__.name))} )
+                .attr('fill', function(d){ return (lineColor(this.parentNode.__data__.name))} )
                 // .attr("fill", "none")
                 // .attr("stroke", function(d){return lineColor(this.parentNode.__data__.name)});
 
