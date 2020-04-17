@@ -12,22 +12,27 @@
 <body>
     <div id='map'></div>
     <div id='lineChart'>
-        <div id ='regionDropdown'></div>
+        <!-- <div id ='regionDropdown'></div> -->
         <div id ='yearDropdown'></div>
         <div id ='buttonArea'></div>
     </div>
-    <div id='barChart'></div>
+    <div id='barChart'>
+        <label><input type="checkbox" id='sort'>Sort values</label>
+        <!-- <div id ='sortDropdown'></div> -->
+    </div>
     <script>
         var noneSelected = true;
         var currYear = 2019;
         var priceDict = [];
         var regionMenu = d3.select("#regionDropdown")
         var yearMenu = d3.select('#yearDropdown')
+        var sortMenu = d3.select('#sort')
         var chartDiv = document.getElementById('map')        
         var pageWidth = window.innerWidth;
         var pageHeight = window.innerHeight;
         var backgroundColor = "#bae8c0";
-        var regionMap = d3.map();
+        var totalMap = d3.map();
+        var totalData = []
     
 
         regionColors = {}
@@ -64,8 +69,6 @@
         var lineChart = d3.select("#lineChart").append("svg")
             .attr('height', pageHeight)
             .attr('width', pageWidth / 2)
-            // .attr("width", lineChartWidth + margin.left + margin.right)
-            // .attr("height", lineChartHeight + margin.top + margin.bottom)
         .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -212,6 +215,25 @@
             }
             return true;
         }   
+
+        const options = [
+            {label: "Alphabetical", value: (a, b) => a.name.localeCompare(b.name)},
+            {label: "Frequency, ascending", value: (a, b) => a.value - b.value},
+            {label: "Frequency, descending", value: (a, b) => b.value - a.value}
+        ];
+
+        // sortMenu.append("select")
+        // .selectAll('option')
+        //     .data(options)
+        //     .enter()
+        //     .append('option')
+        // .text(function (d) { 
+        //     return d.label; 
+        // })
+        // .attr("value", function (d) { 
+        //     return d.value; 
+        // })
+
 // ------------------------------------------- LINE CHART -------------------------------------------- //
 
         var regionPrices = d3.map()
@@ -274,9 +296,9 @@
                     .text("🥑Average Monthly Prices (" + currYear + ")🥑")
             
             // -------------------- Scaling -----------------------//
-            x = d3.scaleTime()
+            var x = d3.scaleTime()
                 .rangeRound([0, lineChartWidth]);
-            y = d3.scaleLinear()
+            var y = d3.scaleLinear()
                 .rangeRound([lineChartHeight, 0]);
 
             color = d3.scaleOrdinal(d3.schemeCategory10);
@@ -295,8 +317,6 @@
                     })
                 };
             });
-
-            console.log(prices)
 
             // --------------- DOMAINS ------------------ // 
             x.domain(d3.extent(priceDict, function(d) {
@@ -378,9 +398,9 @@
                 .append("circle")
                 .attr("r", 2)
                 .attr("cx", function(dd){ return x(parser(dd.date))})
-                .attr("cy", function(dd){ return y(dd.price) })
-                .attr("fill", "none")
-                .attr("stroke", function(d){return lineColor(this.parentNode.__data__.name)});
+                .attr("cy", function(dd){ return y(dd.price) });
+                // .attr("fill", "none")
+                // .attr("stroke", function(d){return lineColor(this.parentNode.__data__.name)});
 
             var legend = price.append('circle')
                 .attr('class', 'legend')
@@ -405,7 +425,7 @@
                 })
                 .attr("dy", ".35em")
                 .attr("font-size", "11px")
-                .style("fill", function(d){ return lineColor(d.name)});
+                .style("fill", "black");
 
             // Add mouse line
             lineChart.selectAll(".mouse-over-effects").remove();
@@ -483,6 +503,125 @@
                 });
             });
         }
+    
+    // -------------------------------------------- BAR CHART -------------------------------------------//
+    // Create bar chart
+
+    d3.csv('./avgTotals.csv', function(d) {
+        totalMap.set([d.region, d.year], d.avg)
+    }, function (error, rows) {
+        updateBarChart();
+    });
+    
+    // Initialize bar chart
+    var barChart = d3.select("#barChart").append("svg")
+            .attr("width", pageWidth)
+            .attr("height", pageHeight)
+	        .append("g")
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    function createTotalData() {
+        totalData = [];
+        regionNames.forEach(function (region) {
+            totalData.push({
+                region: region,
+                avgPrice: +totalMap.get([region, currYear])
+            })
+        })
+    }
+
+    var barChartWidth = pageWidth - margin.left - margin.right
+    var barChartHeight = pageHeight - margin.top - margin.bottom
+    function updateBarChart() {
+        createTotalData();
+        // New title
+        barChart.select("#title").remove();
+            barChart.append("text")
+                    .attr('x', (barChartWidth / 2))             
+                    .attr('y', 0 - (margin.top / 3))
+                    .attr('text-anchor', 'middle') 
+                    .attr('id', 'title') 
+                    .style('font-size', '16px')
+                    .text("🥑Average Yearly Prices (" + currYear + ")🥑")
+
+        var xScale = d3.scaleBand().rangeRound([0, barChartWidth]).padding(0.1);
+        var yScale = d3.scaleLinear().rangeRound([barChartHeight, 0]);
+
+        xScale.domain(totalData.map(function(d) { return d.region; }));
+        yScale.domain([d3.min(totalData, function(d) { return d.avgPrice; }) - 0.1, d3.max(totalData, function(d) { return d.avgPrice; })]);
+
+        // Add the bars
+        barChart.selectAll(".bar")
+            .data(totalData)
+            .enter()
+            .append("rect")
+                .attr("class", "bar")
+                .attr("fill", "steelblue")
+                .attr("x", function(d) { return xScale(d.region); })
+                .attr("y", function(d) { return yScale(d.avgPrice); })
+                .attr("width", xScale.bandwidth())
+                .attr("height", function(d) { return barChartHeight - yScale(d.avgPrice); })
+            .on("mouseover", function(d) {
+                d3.select(this).attr("fill", "green")
+            }).on("mouseout", function(d) {
+                d3.select(this).attr("fill", "steelBlue")
+            });
+
+        // Append x axis
+        barChart.append("g")
+            .attr("class", "axis axis--x")
+            .attr("transform", "translate(0," + barChartHeight + ")")
+            .call(d3.axisBottom(xScale))
+            .selectAll("text")
+            .attr("y", 0)
+            .attr("x", 9)
+            .attr("dy", ".35em")
+            .attr("transform", "rotate(-90)")
+            .style("text-anchor", "start");
+
+        // Append y axis
+        barChart.append("g")
+            .attr("class", "axis axis--y")
+            .call(d3.axisLeft(yScale))
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .style("fill", "black")
+            .text("Average Price (USD)");
+    }
+
+    sortMenu.on("change", function() {
+        var xScale = d3.scaleBand().rangeRound([0, barChartWidth]).padding(0.1);
+        var xScale0 = xScale.domain(totalData.sort(this.checked
+		? function(a, b) { console.log("Sorting"); return b.avgPrice - a.avgPrice; }
+		: function(a, b) { console.log("Alphabetizing"); return d3.ascending(a.region, b.region); })
+		.map(function(d) { return d.region; }))
+		.copy();
+
+        barChart.selectAll(".bar")
+            .sort(function(a, b) { return xScale0(a.region) - xScale0(b.region); });
+
+        var transition = barChart.transition().duration(750);
+        var delay = function(d, i) { return i * 50; };
+
+        transition.selectAll(".bar")
+                .delay(delay)
+                .attr("x", function(d) { return xScale0(d.region); });
+
+        transition.select(".axis--x")
+            .call(d3.axisBottom(xScale))
+            .selectAll("g")
+                .delay(delay)
+            .selectAll('text')
+            .attr("y", 0)
+            .attr("x", 9)
+            .attr("dy", ".35em")
+            .attr("transform", "rotate(-90)")
+            .style("text-anchor", "start");
+    });
+
     </script>
 </body>
 
