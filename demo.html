@@ -296,9 +296,9 @@
                     .text("🥑Average Monthly Prices (" + currYear + ")🥑")
             
             // -------------------- Scaling -----------------------//
-            x = d3.scaleTime()
+            var x = d3.scaleTime()
                 .rangeRound([0, lineChartWidth]);
-            y = d3.scaleLinear()
+            var y = d3.scaleLinear()
                 .rangeRound([lineChartHeight, 0]);
 
             color = d3.scaleOrdinal(d3.schemeCategory10);
