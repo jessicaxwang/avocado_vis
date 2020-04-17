@@ -398,9 +398,9 @@
                 .append("circle")
                 .attr("r", 2)
                 .attr("cx", function(dd){ return x(parser(dd.date))})
-                .attr("cy", function(dd){ return y(dd.price) })
-                .attr("fill", "none")
-                .attr("stroke", function(d){return lineColor(this.parentNode.__data__.name)});
+                .attr("cy", function(dd){ return y(dd.price) });
+                // .attr("fill", "none")
+                // .attr("stroke", function(d){return lineColor(this.parentNode.__data__.name)});
 
             var legend = price.append('circle')
                 .attr('class', 'legend')
@@ -514,18 +514,9 @@
     });
     
     // Initialize bar chart
-    var x = d3.scaleBand()
-        .domain(totalData.map(d => d.region))
-        .range([margin.left, pageWidth - margin.right])
-        .padding(0.1)
-
-    var y = d3.scaleLinear()
-        .domain([0, d3.max(totalData, d => d.avgPrice)]).nice()
-        .range([pageHeight - margin.bottom, margin.top])
-
     var barChart = d3.select("#barChart").append("svg")
-            .attr("width", pageWidth + margin.left + margin.right)
-            .attr("height", pageHeight + margin.top + margin.bottom)
+            .attr("width", pageWidth)
+            .attr("height", pageHeight)
 	        .append("g")
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -539,10 +530,12 @@
         })
     }
 
+    var barChartWidth = pageWidth - margin.left - margin.right
+    var barChartHeight = pageHeight - margin.top - margin.bottom
     function updateBarChart() {
         createTotalData();
-        var xScale = d3.scaleBand().rangeRound([0, pageWidth]).padding(0.1);
-        var yScale = d3.scaleLinear().rangeRound([pageHeight, 0]);
+        var xScale = d3.scaleBand().rangeRound([0, barChartWidth]).padding(0.1);
+        var yScale = d3.scaleLinear().rangeRound([barChartHeight, 0]);
 
         xScale.domain(totalData.map(function(d) { return d.region; }));
         yScale.domain([0, d3.max(totalData, function(d) { return d.avgPrice; })]);
@@ -557,12 +550,12 @@
                 .attr("x", function(d) { return xScale(d.region); })
                 .attr("y", function(d) { return yScale(d.avgPrice); })
                 .attr("width", xScale.bandwidth())
-                .attr("height", function(d) { return pageHeight - yScale(d.avgPrice); });
+                .attr("height", function(d) { return barChartHeight - yScale(d.avgPrice); });
 
         // Append x axis
         barChart.append("g")
             .attr("class", "axis axis--x")
-            .attr("transform", "translate(0," + pageHeight + ")")
+            .attr("transform", "translate(0," + barChartHeight + ")")
             .call(d3.axisBottom(xScale))
             .selectAll("text")
             .attr("y", 0)
@@ -585,7 +578,7 @@
     }
 
     sortMenu.on("change", function() {
-        var xScale = d3.scaleBand().rangeRound([0, pageWidth]).padding(0.1);
+        var xScale = d3.scaleBand().rangeRound([0, barChartWidth]).padding(0.1);
         var xScale0 = xScale.domain(totalData.sort(this.checked
 		? function(a, b) { console.log("Sorting"); return b.avgPrice - a.avgPrice; }
 		: function(a, b) { console.log("Alphabetizing"); return d3.ascending(a.region, b.region); })
