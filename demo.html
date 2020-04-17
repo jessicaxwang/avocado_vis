@@ -30,7 +30,7 @@
         var chartDiv = document.getElementById('map')        
         var pageWidth = window.innerWidth;
         var pageHeight = window.innerHeight;
-        var backgroundColor = "#bae8c0";
+        var backgroundColor = "white";
         var totalMap = d3.map();
         var totalData = []
     
@@ -50,7 +50,7 @@
             regionColors[element] = '#'.concat(current.toString(16))
             current = current + interval
         }
-        regionColors['Total U.S.'] = "#ffffff"
+        regionColors['Total U.S.'] = "#000000"
         regionColors['Albany'] = '#05d174'
         regionColors['Atlanta'] = '#0ba2e8'
 
@@ -561,7 +561,7 @@
             .enter()
             .append("rect")
                 .attr("class", "bar")
-                .attr("fill", "steelblue")
+                .attr("fill", "#90983B")
                 .attr("x", function(d) { return xScale(d.region); })
                 .attr("y", function(d) { return yScale(d.avgPrice); })
                 .attr("width", xScale.bandwidth())
@@ -569,7 +569,7 @@
             .on("mouseover", function(d) {
                 d3.select(this).attr("fill", "green")
             }).on("mouseout", function(d) {
-                d3.select(this).attr("fill", "steelBlue")
+                d3.select(this).attr("fill", "#90983B")
             });
 
         // Append x axis
@@ -582,7 +582,7 @@
             .attr("x", 9)
             .attr("dy", ".35em")
             .attr("transform", "rotate(-90)")
-            .style("text-anchor", "start");
+            .style("text-anchor", "start")
 
         // Append y axis
         barChart.append("g")
@@ -593,7 +593,6 @@
             .attr("y", 6)
             .attr("dy", ".71em")
             .style("text-anchor", "end")
-            .style("fill", "black")
             .text("Average Price (USD)");
     }
 
@@ -624,7 +623,7 @@
             .attr("x", 9)
             .attr("dy", ".35em")
             .attr("transform", "rotate(-90)")
-            .style("text-anchor", "start");
+            .style("text-anchor", "start")
     });
 
     </script>

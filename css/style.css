@@ -5,8 +5,8 @@ html, body {
 
 .states {
     /* fill: #ad9758; */
-    fill: #654321;
-    stroke: #fff;
+    fill: #A2BC80;
+    stroke: #ffffff;
 }
 
 #map {
@@ -45,8 +45,9 @@ circle {
 }
 
 text {
-    font-family: Optima, Futura, sans-serif;
-    font-weight: bold;
+    font-family: source-sans-pro, sans-serif;
+    font-weight: normal;
+    fill: #0F2048;
 }
 
 
