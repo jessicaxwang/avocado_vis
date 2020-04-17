@@ -534,11 +534,21 @@
     var barChartHeight = pageHeight - margin.top - margin.bottom
     function updateBarChart() {
         createTotalData();
+        // New title
+        barChart.select("#title").remove();
+            barChart.append("text")
+                    .attr('x', (barChartWidth / 2))             
+                    .attr('y', 0 - (margin.top / 3))
+                    .attr('text-anchor', 'middle') 
+                    .attr('id', 'title') 
+                    .style('font-size', '16px')
+                    .text("🥑Average Yearly Prices (" + currYear + ")🥑")
+
         var xScale = d3.scaleBand().rangeRound([0, barChartWidth]).padding(0.1);
         var yScale = d3.scaleLinear().rangeRound([barChartHeight, 0]);
 
         xScale.domain(totalData.map(function(d) { return d.region; }));
-        yScale.domain([0, d3.max(totalData, function(d) { return d.avgPrice; })]);
+        yScale.domain([d3.min(totalData, function(d) { return d.avgPrice; }) - 0.1, d3.max(totalData, function(d) { return d.avgPrice; })]);
 
         // Add the bars
         barChart.selectAll(".bar")
@@ -550,7 +560,12 @@
                 .attr("x", function(d) { return xScale(d.region); })
                 .attr("y", function(d) { return yScale(d.avgPrice); })
                 .attr("width", xScale.bandwidth())
-                .attr("height", function(d) { return barChartHeight - yScale(d.avgPrice); });
+                .attr("height", function(d) { return barChartHeight - yScale(d.avgPrice); })
+            .on("mouseover", function(d) {
+                d3.select(this).attr("fill", "green")
+            }).on("mouseout", function(d) {
+                d3.select(this).attr("fill", "steelBlue")
+            });
 
         // Append x axis
         barChart.append("g")
@@ -569,11 +584,11 @@
             .attr("class", "axis axis--y")
             .call(d3.axisLeft(yScale))
             .append("text")
-            .attr("class", "axis--label")
             .attr("transform", "rotate(-90)")
-            .attr("y", 10)
-            .attr("dy", "0.71em")
-            .attr("text-anchor", "end")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .style("fill", "black")
             .text("Average Price (USD)");
     }
 
