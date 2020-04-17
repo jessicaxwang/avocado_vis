@@ -65,7 +65,7 @@
                     .projection(projection);
     
         // Create line chart
-        var margin = {left: 50, right: 50, top: 50, bottom: 50};
+        var margin = {left: 100, right: 50, top: 50, bottom: 100};
         var lineChartWidth = pageWidth / 2.5 ; 
         var lineChartHeight = pageHeight / 1.3;
 
@@ -513,7 +513,7 @@
     // Create bar chart
 
     d3.csv('./avgTotals.csv', function(d) {
-        totalMap.set([d.region, d.year], d.avg)
+        totalMap.set([d.region, d.year], d.totalVol)
     }, function (error, rows) {
         updateBarChart();
     });
@@ -530,7 +530,7 @@
         regionNames.forEach(function (region) {
             totalData.push({
                 region: region,
-                avgPrice: +totalMap.get([region, currYear])
+                totalVol: +totalMap.get([region, currYear])
             })
         })
     }
@@ -547,13 +547,13 @@
                     .attr('text-anchor', 'middle') 
                     .attr('id', 'title') 
                     .style('font-size', '16px')
-                    .text("🥑Average Yearly Prices (" + currYear + ")🥑")
+                    .text("🥑Average Yearly Number of Avocados Sold (" + currYear + ")🥑")
 
         var xScale = d3.scaleBand().rangeRound([0, barChartWidth]).padding(0.1);
         var yScale = d3.scaleLinear().rangeRound([barChartHeight, 0]);
 
         xScale.domain(totalData.map(function(d) { return d.region; }));
-        yScale.domain([d3.min(totalData, function(d) { return d.avgPrice; }) - 0.1, d3.max(totalData, function(d) { return d.avgPrice; })]);
+        yScale.domain([d3.min(totalData, function(d) { return d.totalVol; }) - 1000000, d3.max(totalData, function(d) { return d.totalVol; })]);
 
         // Add the bars
         barChart.selectAll(".bar")
@@ -563,9 +563,9 @@
                 .attr("class", "bar")
                 .attr("fill", "#90983B")
                 .attr("x", function(d) { return xScale(d.region); })
-                .attr("y", function(d) { return yScale(d.avgPrice); })
+                .attr("y", function(d) { return yScale(d.totalVol); })
                 .attr("width", xScale.bandwidth())
-                .attr("height", function(d) { return barChartHeight - yScale(d.avgPrice); })
+                .attr("height", function(d) { return barChartHeight - yScale(d.totalVol); })
             .on("mouseover", function(d) {
                 d3.select(this).attr("fill", "green")
             }).on("mouseout", function(d) {
@@ -581,7 +581,7 @@
             .attr("y", 0)
             .attr("x", 9)
             .attr("dy", ".35em")
-            .attr("transform", "rotate(-90)")
+            .attr("transform", "rotate(65)")
             .style("text-anchor", "start")
 
         // Append y axis
@@ -593,13 +593,13 @@
             .attr("y", 6)
             .attr("dy", ".71em")
             .style("text-anchor", "end")
-            .text("Average Price (USD)");
+            .text("Yearly Avocados Sold");
     }
 
     sortMenu.on("change", function() {
         var xScale = d3.scaleBand().rangeRound([0, barChartWidth]).padding(0.1);
         var xScale0 = xScale.domain(totalData.sort(this.checked
-		? function(a, b) { console.log("Sorting"); return b.avgPrice - a.avgPrice; }
+		? function(a, b) { console.log("Sorting"); return b.totalVol - a.totalVol; }
 		: function(a, b) { console.log("Alphabetizing"); return d3.ascending(a.region, b.region); })
 		.map(function(d) { return d.region; }))
 		.copy();
@@ -622,7 +622,7 @@
             .attr("y", 0)
             .attr("x", 9)
             .attr("dy", ".35em")
-            .attr("transform", "rotate(-90)")
+            .attr("transform", "rotate(65)")
             .style("text-anchor", "start")
     });
 

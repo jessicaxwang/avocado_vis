@@ -2,9 +2,8 @@ import csv
 import os
 from pprint import pprint
 
-
-raw = {}
-avg = {}
+raw = {} # (Albany, 2019): [[],[]]
+avg = {} # (Albany, 2019): (avgPrice, avgVol)
 
 with open('totalAvocado_v5.csv', 'r') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
@@ -13,15 +12,17 @@ with open('totalAvocado_v5.csv', 'r') as csv_file:
             region = row[14]
             year = row[12]
             price = float(row[2])
+            volume = float(row[3])
             k = (region, year)
             if k not in raw:
-                raw[k] = []
-            raw[k].append(price)
+                raw[k] = [[] for _ in range(2)]
+            raw[k][0].append(price)
+            raw[k][1].append(volume)
 
-avg = { k : round(sum(v) / len(v), 2) for (k, v) in raw.items()}
+avg = { k : (round(sum(prices) / len(prices), 2), round(sum(vol), 2))for (k, (prices, vol)) in raw.items()}
 
-allCols = ['region', 'year', 'avg']
+allCols = ['region', 'year', 'avg', 'totalVol']
 with open('avgTotals.csv', 'w') as f:
     f.write(','.join(allCols) + '\n')
-    for ((region, year), yearData) in avg.items():
-        f.write(f'{region},{year},{yearData}\n')
+    for ((region, year), (prices, vol)) in avg.items():
+        f.write(f'{region},{year},{prices},{vol}\n')
