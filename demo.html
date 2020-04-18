@@ -21,8 +21,11 @@
         <!-- <div id ='sortDropdown'></div> -->
     </div>
     <script>
+        const PRICE = 0
+        const VOL = 1
         var noneSelected = true;
         var currYear = 2019;
+        var currMode = PRICE
         var priceDict = [];
         var regionMenu = d3.select("#regionDropdown")
         var yearMenu = d3.select('#yearDropdown')
@@ -73,7 +76,7 @@
             .attr('height', pageHeight)
             .attr('width', pageWidth / 2)
         .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            .attr("transform", "translate(" + 60 + "," + margin.top + ")");
 
         var clearAll = d3.select("#buttonArea").append("button")
             .text("Clear All")
@@ -176,6 +179,7 @@
 
                     // Initialize year menu
                     yearMenu.append("select")
+                        .attr("class", "years")
                         .selectAll('option')
                             .data([2019, 2018, 2017, 2016])
                             .enter()
@@ -185,17 +189,39 @@
                         })
                         .attr("value", function (d) { 
                             return d; 
+                        })
+                    
+                    yearMenu.on("change", function(d) {
+                            var val = d3.select(this)
+                                .select("select")
+                                .property("value");
+                                currYear = val;
+                            if (noCitiesSelected()) {
+                                noneSelected = true;
+                            }
+                            updateLineChart(false);
+                        });
+
+                    priceVol = yearMenu.append("select")
+                        .attr("id", "priceVol")
+                        .selectAll('option')
+                            .data([{"title": "Average Price", "value": 0}, 
+                                   {"title": "Average Volume", "value": 1}])
+                            .enter()
+                            .append('option')
+                        .text(function (d) { 
+                            return d.title; 
+                        })
+                        .attr("value", function (d) { 
+                            return d.value; 
                     })
 
-                    yearMenu.on("change", function(d) {
-                        var val = d3.select(this)
-                            .select("select")
-                            .property("value");
-                            currYear = val;
-                        if (noCitiesSelected()) {
-                            noneSelected = true;
-                        }
-                        updateLineChart(false);
+                    yearMenu.select("#priceVol").on("change", function (d) {
+                        console.log("CHANGED")
+                        var newMode = d3.select(this)
+                                .property("value");
+                        currMode = newMode
+                        updateLineChart(false)
                     })
                 })
         }
@@ -219,11 +245,11 @@
             return true;
         }   
 
-        const options = [
-            {label: "Alphabetical", value: (a, b) => a.name.localeCompare(b.name)},
-            {label: "Frequency, ascending", value: (a, b) => a.value - b.value},
-            {label: "Frequency, descending", value: (a, b) => b.value - a.value}
-        ];
+        // const options = [
+        //     {label: "Alphabetical", value: (a, b) => a.name.localeCompare(b.name)},
+        //     {label: "Frequency, ascending", value: (a, b) => a.value - b.value},
+        //     {label: "Frequency, descending", value: (a, b) => b.value - a.value}
+        // ];
 
         // sortMenu.append("select")
         // .selectAll('option')
@@ -241,8 +267,9 @@
 
         var regionPrices = d3.map()
         d3.csv('./avgAvocado.csv', function(d) {
-            avgPrices = [d.jan, d.feb, d.mar, d.apr, d.may, d.jun, d.jul, d.aug, d.sep, d.oct, d.nov, d.dec]
-            regionPrices.set([d.region, d.year], avgPrices)
+            avgPrices = [d.janP, d.febP, d.marP, d.aprP, d.mayP, d.junP, d.julP, d.augP, d.sepP, d.octP, d.novP, d.decP]
+            avgVol = [d.janV, d.febV, d.marV, d.aprV, d.mayV, d.junV, d.julV, d.augV, d.sepV, d.octV, d.novV, d.decV]
+            regionPrices.set([d.region, d.year], [avgPrices, avgVol])
         }, function (error, rows) {
             // Initialize the line chart
             updateLineChart(true);
@@ -264,7 +291,7 @@
                 {"month": "dec"}]
 
             if (noneSelected) {
-                var pricePerRegion = regionPrices.get(["Total U.S.", currYear]);
+                var pricePerRegion = regionPrices.get(["Total U.S.", currYear])[currMode];
                 priceDict.forEach(function (monthObj) {
                         monthObj["Total U.S."] = pricePerRegion[months.indexOf(monthObj.month)];
                 })
@@ -272,7 +299,7 @@
             } else {
                 d3.keys(selectedCities).forEach(function (d) {
                     if (selectedCities[d]) {
-                        var pricePerRegion = regionPrices.get([d, currYear]);
+                        var pricePerRegion = regionPrices.get([d, currYear])[currMode];
                         priceDict.forEach(function (monthObj) {
                             monthObj[d] = pricePerRegion[months.indexOf(monthObj.month)];
                         })
@@ -290,13 +317,23 @@
             makePriceDict(currYear);            
             // New title
             lineChart.select("#title").remove();
-            lineChart.append("text")
-                    .attr('x', (lineChartWidth / 2))             
-                    .attr('y', 0 - (margin.top / 3))
-                    .attr('text-anchor', 'middle') 
-                    .attr('id', 'title') 
-                    .style('font-size', '16px')
-                    .text("🥑Average Monthly Prices (" + currYear + ")🥑")
+            if (currMode == PRICE) {
+                lineChart.append("text")
+                        .attr('x', (lineChartWidth / 2))             
+                        .attr('y', 0 - (margin.top / 3))
+                        .attr('text-anchor', 'middle') 
+                        .attr('id', 'title') 
+                        .style('font-size', '16px')
+                        .text("🥑Average Monthly Prices (" + currYear + ")🥑")
+            } else {
+                lineChart.append("text")
+                        .attr('x', (lineChartWidth / 2))             
+                        .attr('y', 0 - (margin.top / 3))
+                        .attr('text-anchor', 'middle') 
+                        .attr('id', 'title') 
+                        .style('font-size', '16px')
+                        .text("🥑Average Monthly Volume of Avocados Sold (" + currYear + ")🥑")
+            }
             
             // -------------------- Scaling -----------------------//
             var x = d3.scaleTime()
@@ -381,6 +418,7 @@
                     .attr("class", "y axis")
                     .call(d3.axisLeft(y))
                     .append("text")
+                    .attr("id", "axisText")
                     .attr("transform", "rotate(-90)")
                     .attr("y", 6)
                     .attr("dy", ".71em")
@@ -388,10 +426,31 @@
                     .style("fill", "black")
                     .text("Average Price (USD)");
             } else {
+                // Redraw Y axis
                 lineChart.selectAll(".y.axis")
                     .transition()
                     .duration(750)
                     .call(d3.axisLeft(y))
+                lineChart.selectAll("#axisText").remove()
+                if (currMode == PRICE) {
+                    lineChart.append("text")
+                    .attr("id", "axisText")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", 6)
+                    .attr("dy", ".71em")
+                    .style("text-anchor", "end")
+                    .style("fill", "black")
+                    .text("Average Price (USD)");
+                } else {
+                    lineChart.append("text")
+                    .attr("id", "axisText")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", 6)
+                    .attr("dy", ".71em")
+                    .style("text-anchor", "end")
+                    .style("fill", "black")
+                    .text("Average Monthly Avocados Sold");
+                }
             }
 
             // Adding dots for price point
@@ -496,7 +555,7 @@
                     idx = bisect(d.values, xDate);
 
                     d3.select(this).select('text')
-                    .text("$" + (y.invert(y(d.values[idx].price)).toFixed(2)));
+                    .text(y.invert(y(d.values[idx].price)).toFixed(2));
 
                     d3.select(".mouse-line")
                     .attr("d", function () {

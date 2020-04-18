@@ -23,6 +23,10 @@ html, body {
     float: left;
 }
 
+#axisText {
+    font-size: 10px;
+}
+
 path { 
     stroke-width: 1;
     fill: none;
