@@ -26,7 +26,7 @@
         var noneSelected = true;
         var currYear = 2019;
         var currMode = PRICE
-        var priceDict = [];
+        var valueDict = [];
         var regionMenu = d3.select("#regionDropdown")
         var yearMenu = d3.select('#yearDropdown')
         var sortMenu = d3.select('#sort')
@@ -202,8 +202,8 @@
                             updateLineChart(false);
                         });
 
-                    priceVol = yearMenu.append("select")
-                        .attr("id", "priceVol")
+                    valueVol = yearMenu.append("select")
+                        .attr("id", "valueVol")
                         .selectAll('option')
                             .data([{"title": "Average Price", "value": 0}, 
                                    {"title": "Average Volume", "value": 1}])
@@ -216,7 +216,7 @@
                             return d.value; 
                     })
 
-                    yearMenu.select("#priceVol").on("change", function (d) {
+                    yearMenu.select("#valueVol").on("change", function (d) {
                         console.log("CHANGED")
                         var newMode = d3.select(this)
                                 .property("value");
@@ -277,7 +277,7 @@
 
         var months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
         function makePriceDict() {
-            priceDict = [{"month": "jan"},
+            valueDict = [{"month": "jan"},
                 {"month": "feb"},
                 {"month": "mar"},
                 {"month": "apr"},
@@ -291,17 +291,17 @@
                 {"month": "dec"}]
 
             if (noneSelected) {
-                var pricePerRegion = regionPrices.get(["Total U.S.", currYear])[currMode];
-                priceDict.forEach(function (monthObj) {
-                        monthObj["Total U.S."] = pricePerRegion[months.indexOf(monthObj.month)];
+                var valuePerRegion = regionPrices.get(["Total U.S.", currYear])[currMode];
+                valueDict.forEach(function (monthObj) {
+                        monthObj["Total U.S."] = valuePerRegion[months.indexOf(monthObj.month)];
                 })
                 noneSelected = false;
             } else {
                 d3.keys(selectedCities).forEach(function (d) {
                     if (selectedCities[d]) {
-                        var pricePerRegion = regionPrices.get([d, currYear])[currMode];
-                        priceDict.forEach(function (monthObj) {
-                            monthObj[d] = pricePerRegion[months.indexOf(monthObj.month)];
+                        var valuePerRegion = regionPrices.get([d, currYear])[currMode];
+                        valueDict.forEach(function (monthObj) {
+                            monthObj[d] = valuePerRegion[months.indexOf(monthObj.month)];
                         })
                     }
                 })
@@ -342,36 +342,36 @@
                 .rangeRound([lineChartHeight, 0]);
 
             color = d3.scaleOrdinal(d3.schemeCategory10);
-            color.domain(d3.keys(priceDict[0]).filter(function(key) {
+            color.domain(d3.keys(valueDict[0]).filter(function(key) {
                 return key !== 'month'
             }));
 
-            var prices = color.domain().map(function(name) {
+            var values = color.domain().map(function(name) {
                 return {
                     name: name,
-                    values: priceDict.map(function(d) {
+                    values: valueDict.map(function(d) {
                         return {
                             date: d.month,
-                            price: +d[name]
+                            value: +d[name]
                         };
                     })
                 };
             });
 
             // --------------- DOMAINS ------------------ // 
-            x.domain(d3.extent(priceDict, function(d) {
+            x.domain(d3.extent(valueDict, function(d) {
                 return parser(d.month);
             }));
 
             y.domain([
-                d3.min(prices, function(c) {
+                d3.min(values, function(c) {
                     return d3.min(c.values, function(v) {
-                        return v.price;
+                        return v.value;
                     });
                 }) - 0.1, 
-                d3.max(prices, function(c) {
+                d3.max(values, function(c) {
                     return d3.max(c.values, function(v) {
-                        return v.price;
+                        return v.value;
                     });
                 })
             ]);
@@ -382,26 +382,25 @@
                     return x(parser(d.date));
                 })
                 .y(function(d) {
-                    return y(d.price);
+                    return y(d.value);
                 })
                 .curve(d3.curveMonotoneX);
 
             if (!init) {
-                d3.selectAll(".price").remove(); // Remove all elements in price
+                d3.selectAll(".value").remove(); // Remove all elements in value
             }
-            price = lineChart.selectAll(".price")
-                .data(prices)
+            value = lineChart.selectAll(".value")
+                .data(values)
                 .enter().append("g")
-                .attr("class", "price");
+                .attr("class", "value");
 
             // Add lines
-            price.append("path")
+            value.append("path")
                 .attr("class", "line")
                 .attr("d", function(d) {
                     return line(d.values);
                 })
                 .style("stroke", function(d) {
-                    // return color(d.name);
                     return lineColor(d.name)
                 });
             
@@ -453,20 +452,18 @@
                 }
             }
 
-            // Adding dots for price point
-            price.append("g").selectAll("circle")
+            // Adding dots for value point
+            value.append("g").selectAll("circle")
                 .data(function(d){ return d.values })
                 .enter()
                 .append("circle")
                 .attr("r", 2)
                 .attr("cx", function(dd){ return x(parser(dd.date))})
-                .attr("cy", function(dd){ return y(dd.price) })
+                .attr("cy", function(dd){ return y(dd.value) })
                 .attr('stroke', function(d){ return (lineColor(this.parentNode.__data__.name))} )
                 .attr('fill', function(d){ return (lineColor(this.parentNode.__data__.name))} )
-                // .attr("fill", "none")
-                // .attr("stroke", function(d){return lineColor(this.parentNode.__data__.name)});
 
-            var legend = price.append('circle')
+            var legend = value.append('circle')
                 .attr('class', 'legend')
                 .datum(function (d) {
                     return {
@@ -474,13 +471,13 @@
                         value: d.values[d.values.length - 1]
                     }
                 })
-                .attr("cx", lineChartWidth - 100)
+                .attr("cx", lineChartWidth - 50)
                 .attr("cy", function(d,i){ return i * 20; })
                 .attr("r", 5)
                 .style("fill", function(d){ return lineColor(d.name)})
 
-                price.append('text')
-                .attr('x', lineChartWidth - 90)
+                value.append('text')
+                .attr('x', lineChartWidth - 40)
                 .attr('y', function(d, i) {
                     return (i * 20);
                 })
@@ -505,7 +502,7 @@
             var lines = document.getElementsByClassName('line');
 
             var mousePerLine = mouseG.selectAll('.mouse-per-line')
-                .data(prices)
+                .data(values)
                 .enter()
                 .append("g")
                 .attr("class", "mouse-per-line");
@@ -555,7 +552,7 @@
                     idx = bisect(d.values, xDate);
 
                     d3.select(this).select('text')
-                    .text(y.invert(y(d.values[idx].price)).toFixed(2));
+                    .text(y.invert(y(d.values[idx].value)).toFixed(2));
 
                     d3.select(".mouse-line")
                     .attr("d", function () {
@@ -563,7 +560,7 @@
                         data += " " + x(parser(d.values[idx].date)) + "," + 0;
                         return data;
                     });
-                    return "translate(" + x(parser(d.values[idx].date)) + "," + y(d.values[idx].price) + ")";
+                    return "translate(" + x(parser(d.values[idx].date)) + "," + y(d.values[idx].value) + ")";
                 });
             });
         }
