@@ -20,6 +20,7 @@
     <div id='barChart'>
         <div id ='yearBar'></div>
         <label><input type="checkbox" id='sort'>Sort values</label>
+        <div class='tooltip' id='tip'></div>
     </div>
     <script>
         const PRICE = 0;
@@ -38,7 +39,6 @@
         var chartDiv = document.getElementById('map');       
         var pageWidth = window.innerWidth;
         var pageHeight = window.innerHeight;
-        var backgroundColor = "white";
         var totalMap = d3.map();
         var totalData = [];
     
@@ -58,11 +58,9 @@
             regionColors[element] = '#'.concat(current.toString(16))
             current = current + interval
         }
-        regionColors['Total U.S.'] = "#000000"
+        regionColors['Total U.S.'] = "black"
         regionColors['Albany'] = '#05d174'
         regionColors['Atlanta'] = '#0ba2e8'
-
-        d3.select("body").style("background-color", backgroundColor);
     
         // Create Map
         var projection = d3.geoAlbersUsa()
@@ -565,7 +563,6 @@
 
     function createTotalData() {
         totalData = [];
-        console.log("noneselected: " + noneSelected)
         if (noneSelected) {
             regionNames.forEach(function (region) {
                 totalData.push({
@@ -574,7 +571,6 @@
                 })
             })
         } else {
-            console.log("other one")
             regionNames.forEach(function (region) {
                 if (selectedCities[region]) {
                     totalData.push({
@@ -634,7 +630,6 @@
     var barChartHeight = pageHeight - margin.top - margin.bottom
     function updateBarChart(init) {
         createTotalData();
-        console.log(totalData)
         // New title
         barChart.select("#title").remove();
         var titleText = "🥑Average Yearly Volume of Avocados Sold (" + barYear + ")🥑";
@@ -660,9 +655,8 @@
 
         // Add the bars
         // Tooltip
-        var tooltip = d3.select("#barChart").append("div")
-                .attr("class", "tooltip")
-                .style("opacity", 0);
+        var tip = d3.select('#tip')
+        tip.style('opacity', 0);
 
         var bars;
         if (!init) {
@@ -674,24 +668,28 @@
             .enter()
             .append("rect")
                 .attr("class", "bar")
-                .attr("fill", "#90983B")
                 .attr("x", function(d) { return xScale(d.region); })
                 .attr("y", function(d) { return yScale(d.value); })
                 .attr("width", xScale.bandwidth())
                 .attr("height", function(d) { return barChartHeight - yScale(d.value); })
+                // .attr("fill", "#90983B")
+                .attr("fill", function(d) {return lineColor(d.region)})
 
         // Mouseover handling
         bars.on("mouseover", function(d) {
-            d3.select(this).attr("fill", "green")
-            tooltip.style("left", (d3.event.pageX - 50) + "px")
-                .style("top", (d3.event.pageY - 70) + "px")
-                .style("opacity", 0.9)
-                .style("display", "block")
-                .html(d.region + "<br>" + formatComma(d.value));
+            d3.select(this).attr("opacity", 0.5)
+            tip.style('opacity', 0.9);
+        })
+        .on("mousemove", function (d) {
+            tip.html(d.region + formatComma(d.value))
+                .style('left', d3.mouse(this)[0] - 10 + 'px')
+                .style('top', d3.mouse(this)[1] + 50 + 'px');
         })
         .on("mouseout", function(d) {
-                d3.select(this).attr("fill", "#90983B")
-                tooltip.style("opacity", 0)
+                // d3.select(this).attr("fill", "#90983B")
+                // d3.select(this).attr("fill", function(d) {return lineColor(d.region)})
+                d3.select(this).attr("opacity", 1)
+                tip.style('opacity', 0);
         });
 
         // Append x axis

@@ -1,6 +1,7 @@
 html, body {
     padding: 0;
     margin: 0;
+    background-color: white;
 }
 
 .states {
@@ -19,9 +20,9 @@ html, body {
 	display: inline-block;
 }
 
-#barChart {
+/* #barChart {
     float: left;
-}
+} */
 
 #axisText {
     font-size: 10px;
@@ -61,7 +62,22 @@ label {
     font-weight: lighter;
     font-size: small;
 }
+/* 
+#tip {
+    position: relative;
+} */
 
 
-
+#tip {	
+    position: relative;			
+    text-align: center;			
+    width: 100px;					
+    height: 40px;					
+    padding: 2px;				
+    font: 12px sans-serif;		
+    background: lightsteelblue;	
+    border: 0px;		
+    border-radius: 8px;			
+    pointer-events: none;			
+}
 
