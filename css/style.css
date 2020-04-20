@@ -62,17 +62,12 @@ label {
     font-weight: lighter;
     font-size: small;
 }
-/* 
-#tip {
-    position: relative;
-} */
-
 
 #tip {	
     position: relative;			
     text-align: center;			
-    width: 100px;					
-    height: 40px;					
+    width: 150px;					
+    height: 43px;					
     padding: 2px;				
     font: 12px sans-serif;		
     background: lightsteelblue;	

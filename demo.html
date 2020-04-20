@@ -681,13 +681,15 @@
             tip.style('opacity', 0.9);
         })
         .on("mousemove", function (d) {
-            tip.html(d.region + formatComma(d.value))
+            var value = '$' + formatComma(d.value);
+            if (barMode == VOL) {
+                value = formatComma(d.value);
+            }
+            tip.html(d.region + "<hr>" + value)
                 .style('left', d3.mouse(this)[0] - 10 + 'px')
                 .style('top', d3.mouse(this)[1] + 50 + 'px');
         })
         .on("mouseout", function(d) {
-                // d3.select(this).attr("fill", "#90983B")
-                // d3.select(this).attr("fill", function(d) {return lineColor(d.region)})
                 d3.select(this).attr("opacity", 1)
                 tip.style('opacity', 0);
         });
