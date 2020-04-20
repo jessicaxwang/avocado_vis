@@ -12,16 +12,20 @@ with open('totalAvocado_v5.csv', 'r') as csv_file:
             region = row[14]
             year = row[12]
             price = float(row[2])
+            vol = float(row[3])
             month = int(row[13])
             k = (region, year)
             if k not in raw:
-                raw[k] = [[] for _ in range(12)]
-            raw[k][month - 1].append(price)
+                raw[k] = [[[] for _ in range(2)] for _ in range(12)]
+            raw[k][month - 1][0].append(price)
+            raw[k][month - 1][1].append(vol)
 
-avg = { region : [ round(sum(month) / len(month), 2) for month in year] for (region, year) in raw.items()}
-allCols = ['region', 'year', 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+avg = { key : [(round(sum(month[0]) / len(month[0]), 2), round(sum(month[1]) / len(month[1]), 2)) for month in yearData] for (key, yearData) in raw.items() }
+
+allCols = ['region', 'year', 'janP', 'febP', 'marP', 'aprP', 'mayP', 'junP', 'julP', 'augP', 'sepP', 'octP', 'novP', 'decP', 
+            'janV', 'febV', 'marV', 'aprV', 'mayV', 'junV', 'julV', 'augV', 'sepV', 'octV', 'novV', 'decV']
 
 with open('avgAvocado.csv', 'w') as f:
     f.write(','.join(allCols) + '\n')
     for ((region, year), yearData) in avg.items():
-        f.write(f'{region},{year},{",".join(str(month) for month in yearData)}\n')
+        f.write(f'{region},{year},{",".join(str(price) for (price, vol) in yearData)},{",".join(str(vol) for (price, vol) in yearData)}\n')

@@ -10,29 +10,37 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div id='map'></div>
-    <div id='lineChart'>
-        <!-- <div id ='regionDropdown'></div> -->
-        <div id ='yearDropdown'></div>
+    <div id='map'>
         <div id ='buttonArea'></div>
     </div>
+    <div id='lineChart'>
+        <div id ='regionDropdown'></div>
+        <div id ='yearDropdown'></div>
+    </div>
     <div id='barChart'>
+        <div id ='yearBar'></div>
         <label><input type="checkbox" id='sort'>Sort values</label>
-        <!-- <div id ='sortDropdown'></div> -->
+        <div class='tooltip' id='tip'></div>
     </div>
     <script>
+        const PRICE = 0;
+        const VOL = 1;
+        const formatComma = d3.format(",");
         var noneSelected = true;
-        var currYear = 2019;
-        var priceDict = [];
-        var regionMenu = d3.select("#regionDropdown")
-        var yearMenu = d3.select('#yearDropdown')
-        var sortMenu = d3.select('#sort')
-        var chartDiv = document.getElementById('map')        
+        var lineYear = 2019;
+        var lineMode = PRICE;
+        var barYear = 2019;
+        var barMode = PRICE;
+        var valueDict = [];
+        var regionMenu = d3.select("#regionDropdown");
+        var yearMenu = d3.select('#yearDropdown');
+        var sortMenu = d3.select('#sort');
+        var yearBar = d3.select('#yearBar');
+        var chartDiv = document.getElementById('map');       
         var pageWidth = window.innerWidth;
         var pageHeight = window.innerHeight;
-        var backgroundColor = "white";
         var totalMap = d3.map();
-        var totalData = []
+        var totalData = [];
     
 
         regionColors = {}
@@ -50,11 +58,9 @@
             regionColors[element] = '#'.concat(current.toString(16))
             current = current + interval
         }
-        regionColors['Total U.S.'] = "#000000"
+        regionColors['Total U.S.'] = "black"
         regionColors['Albany'] = '#05d174'
         regionColors['Atlanta'] = '#0ba2e8'
-
-        d3.select("body").style("background-color", backgroundColor);
     
         // Create Map
         var projection = d3.geoAlbersUsa()
@@ -73,7 +79,7 @@
             .attr('height', pageHeight)
             .attr('width', pageWidth / 2)
         .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            .attr("transform", "translate(" + 60 + "," + margin.top + ")");
 
         var clearAll = d3.select("#buttonArea").append("button")
             .text("Clear All")
@@ -149,8 +155,12 @@
                         selectedCities[d.region] = !selectedCities[d.region]
                         if (noCitiesSelected()) {
                             noneSelected = true;
+                        } else {
+                            noneSelected = false;
                         }
+                        d3.selectAll('input').property('checked', false);
                         updateLineChart(false)
+                        updateBarChart(false)
                     })
                 
                     // Initialize region menu
@@ -176,6 +186,7 @@
 
                     // Initialize year menu
                     yearMenu.append("select")
+                        .attr("class", "years")
                         .selectAll('option')
                             .data([2019, 2018, 2017, 2016])
                             .enter()
@@ -185,17 +196,38 @@
                         })
                         .attr("value", function (d) { 
                             return d; 
+                        })
+                    
+                    yearMenu.on("change", function(d) {
+                            var val = d3.select(this)
+                                .select("select")
+                                .property("value");
+                                lineYear = val;
+                            if (noCitiesSelected()) {
+                                noneSelected = true;
+                            }
+                            updateLineChart(false);
+                        });
+
+                    valueVol = yearMenu.append("select")
+                        .attr("id", "valueVol")
+                        .selectAll('option')
+                            .data([{"title": "Average Price", "value": 0}, 
+                                   {"title": "Average Volume", "value": 1}])
+                            .enter()
+                            .append('option')
+                        .text(function (d) { 
+                            return d.title; 
+                        })
+                        .attr("value", function (d) { 
+                            return d.value; 
                     })
 
-                    yearMenu.on("change", function(d) {
-                        var val = d3.select(this)
-                            .select("select")
-                            .property("value");
-                            currYear = val;
-                        if (noCitiesSelected()) {
-                            noneSelected = true;
-                        }
-                        updateLineChart(false);
+                    yearMenu.select("#valueVol").on("change", function (d) {
+                        var newMode = +d3.select(this)
+                                .property("value");
+                        lineMode = newMode
+                        updateLineChart(false)
                     })
                 })
         }
@@ -209,6 +241,7 @@
                 .style('stroke-width', 0)
                 .attr('xlink:href', './avocado.png')
             updateLineChart(false);
+            updateBarChart(false);
         });
 
         function noCitiesSelected() {
@@ -219,30 +252,13 @@
             return true;
         }   
 
-        const options = [
-            {label: "Alphabetical", value: (a, b) => a.name.localeCompare(b.name)},
-            {label: "Frequency, ascending", value: (a, b) => a.value - b.value},
-            {label: "Frequency, descending", value: (a, b) => b.value - a.value}
-        ];
-
-        // sortMenu.append("select")
-        // .selectAll('option')
-        //     .data(options)
-        //     .enter()
-        //     .append('option')
-        // .text(function (d) { 
-        //     return d.label; 
-        // })
-        // .attr("value", function (d) { 
-        //     return d.value; 
-        // })
-
 // ------------------------------------------- LINE CHART -------------------------------------------- //
 
         var regionPrices = d3.map()
         d3.csv('./avgAvocado.csv', function(d) {
-            avgPrices = [d.jan, d.feb, d.mar, d.apr, d.may, d.jun, d.jul, d.aug, d.sep, d.oct, d.nov, d.dec]
-            regionPrices.set([d.region, d.year], avgPrices)
+            avgPrices = [d.janP, d.febP, d.marP, d.aprP, d.mayP, d.junP, d.julP, d.augP, d.sepP, d.octP, d.novP, d.decP]
+            avgVol = [d.janV, d.febV, d.marV, d.aprV, d.mayV, d.junV, d.julV, d.augV, d.sepV, d.octV, d.novV, d.decV]
+            regionPrices.set([d.region, d.year], [avgPrices, avgVol])
         }, function (error, rows) {
             // Initialize the line chart
             updateLineChart(true);
@@ -250,7 +266,7 @@
 
         var months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
         function makePriceDict() {
-            priceDict = [{"month": "jan"},
+            valueDict = [{"month": "jan"},
                 {"month": "feb"},
                 {"month": "mar"},
                 {"month": "apr"},
@@ -264,17 +280,16 @@
                 {"month": "dec"}]
 
             if (noneSelected) {
-                var pricePerRegion = regionPrices.get(["Total U.S.", currYear]);
-                priceDict.forEach(function (monthObj) {
-                        monthObj["Total U.S."] = pricePerRegion[months.indexOf(monthObj.month)];
+                var valuePerRegion = regionPrices.get(["Total U.S.", lineYear])[lineMode];
+                valueDict.forEach(function (monthObj) {
+                        monthObj["Total U.S."] = valuePerRegion[months.indexOf(monthObj.month)];
                 })
-                noneSelected = false;
             } else {
                 d3.keys(selectedCities).forEach(function (d) {
                     if (selectedCities[d]) {
-                        var pricePerRegion = regionPrices.get([d, currYear]);
-                        priceDict.forEach(function (monthObj) {
-                            monthObj[d] = pricePerRegion[months.indexOf(monthObj.month)];
+                        var valuePerRegion = regionPrices.get([d, lineYear])[lineMode];
+                        valueDict.forEach(function (monthObj) {
+                            monthObj[d] = valuePerRegion[months.indexOf(monthObj.month)];
                         })
                     }
                 })
@@ -287,16 +302,20 @@
 
         function updateLineChart(init) {
             // Getting new data    
-            makePriceDict(currYear);            
+            makePriceDict(lineYear);            
             // New title
             lineChart.select("#title").remove();
+            var titleText = "🥑Average Monthly Prices (" + lineYear + ")🥑";
+            if (lineMode == VOL)
+                titleText = "🥑Average Monthly Volume of Avocados Sold (" + lineYear + ")🥑";
+    
             lineChart.append("text")
                     .attr('x', (lineChartWidth / 2))             
                     .attr('y', 0 - (margin.top / 3))
                     .attr('text-anchor', 'middle') 
                     .attr('id', 'title') 
                     .style('font-size', '16px')
-                    .text("🥑Average Monthly Prices (" + currYear + ")🥑")
+                    .text(titleText)
             
             // -------------------- Scaling -----------------------//
             var x = d3.scaleTime()
@@ -305,36 +324,41 @@
                 .rangeRound([lineChartHeight, 0]);
 
             color = d3.scaleOrdinal(d3.schemeCategory10);
-            color.domain(d3.keys(priceDict[0]).filter(function(key) {
+            color.domain(d3.keys(valueDict[0]).filter(function(key) {
                 return key !== 'month'
             }));
 
-            var prices = color.domain().map(function(name) {
+            var values = color.domain().map(function(name) {
                 return {
                     name: name,
-                    values: priceDict.map(function(d) {
+                    values: valueDict.map(function(d) {
                         return {
                             date: d.month,
-                            price: +d[name]
+                            value: +d[name]
                         };
                     })
                 };
             });
 
             // --------------- DOMAINS ------------------ // 
-            x.domain(d3.extent(priceDict, function(d) {
+            x.domain(d3.extent(valueDict, function(d) {
                 return parser(d.month);
             }));
 
-            y.domain([
-                d3.min(prices, function(c) {
+            // Offset
+            var offset = 0.1
+            if (lineMode == VOL) {
+                offset = 10000
+            }
+
+            y.domain([d3.min(values, function(c) {
                     return d3.min(c.values, function(v) {
-                        return v.price;
+                        return v.value;
                     });
-                }) - 0.1, 
-                d3.max(prices, function(c) {
+                }) - offset,
+                d3.max(values, function(c) {
                     return d3.max(c.values, function(v) {
-                        return v.price;
+                        return v.value;
                     });
                 })
             ]);
@@ -345,26 +369,25 @@
                     return x(parser(d.date));
                 })
                 .y(function(d) {
-                    return y(d.price);
+                    return y(d.value);
                 })
                 .curve(d3.curveMonotoneX);
 
             if (!init) {
-                d3.selectAll(".price").remove(); // Remove all elements in price
+                d3.selectAll(".value").remove(); // Remove all elements in value
             }
-            price = lineChart.selectAll(".price")
-                .data(prices)
+            value = lineChart.selectAll(".value")
+                .data(values)
                 .enter().append("g")
-                .attr("class", "price");
+                .attr("class", "value");
 
             // Add lines
-            price.append("path")
+            value.append("path")
                 .attr("class", "line")
                 .attr("d", function(d) {
                     return line(d.values);
                 })
                 .style("stroke", function(d) {
-                    // return color(d.name);
                     return lineColor(d.name)
                 });
             
@@ -375,12 +398,14 @@
                     .attr("transform", "translate(0," + lineChartHeight + ")")
                     .call(d3.axisBottom(x).tickFormat(d3.timeFormat(xFormat)));
             }
+
             // Append y axis
             if (init) {
                 lineChart.append("g")
                     .attr("class", "y axis")
                     .call(d3.axisLeft(y))
                     .append("text")
+                    .attr("id", "axisText")
                     .attr("transform", "rotate(-90)")
                     .attr("y", 6)
                     .attr("dy", ".71em")
@@ -388,26 +413,37 @@
                     .style("fill", "black")
                     .text("Average Price (USD)");
             } else {
+                // Redraw Y axis
                 lineChart.selectAll(".y.axis")
                     .transition()
                     .duration(750)
                     .call(d3.axisLeft(y))
+                lineChart.selectAll("#axisText").remove()
+                var axisText = "Average Price (USD)"
+                if (lineMode == VOL)
+                    axisText = "Average Monthly Avocados Sold"
+                lineChart.append("text")
+                .attr("id", "axisText")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .style("fill", "black")
+                .text(axisText);
             }
 
-            // Adding dots for price point
-            price.append("g").selectAll("circle")
+            // Adding dots for value point
+            value.append("g").selectAll("circle")
                 .data(function(d){ return d.values })
                 .enter()
                 .append("circle")
                 .attr("r", 2)
                 .attr("cx", function(dd){ return x(parser(dd.date))})
-                .attr("cy", function(dd){ return y(dd.price) })
+                .attr("cy", function(dd){ return y(dd.value) })
                 .attr('stroke', function(d){ return (lineColor(this.parentNode.__data__.name))} )
                 .attr('fill', function(d){ return (lineColor(this.parentNode.__data__.name))} )
-                // .attr("fill", "none")
-                // .attr("stroke", function(d){return lineColor(this.parentNode.__data__.name)});
 
-            var legend = price.append('circle')
+            var legend = value.append('circle')
                 .attr('class', 'legend')
                 .datum(function (d) {
                     return {
@@ -415,13 +451,13 @@
                         value: d.values[d.values.length - 1]
                     }
                 })
-                .attr("cx", lineChartWidth - 100)
+                .attr("cx", lineChartWidth - 50)
                 .attr("cy", function(d,i){ return i * 20; })
                 .attr("r", 5)
                 .style("fill", function(d){ return lineColor(d.name)})
 
-                price.append('text')
-                .attr('x', lineChartWidth - 90)
+                value.append('text')
+                .attr('x', lineChartWidth - 40)
                 .attr('y', function(d, i) {
                     return (i * 20);
                 })
@@ -446,7 +482,7 @@
             var lines = document.getElementsByClassName('line');
 
             var mousePerLine = mouseG.selectAll('.mouse-per-line')
-                .data(prices)
+                .data(values)
                 .enter()
                 .append("g")
                 .attr("class", "mouse-per-line");
@@ -496,7 +532,7 @@
                     idx = bisect(d.values, xDate);
 
                     d3.select(this).select('text')
-                    .text("$" + (y.invert(y(d.values[idx].price)).toFixed(2)));
+                    .text(formatComma(y.invert(y(d.values[idx].value)).toFixed(2)));
 
                     d3.select(".mouse-line")
                     .attr("d", function () {
@@ -504,7 +540,7 @@
                         data += " " + x(parser(d.values[idx].date)) + "," + 0;
                         return data;
                     });
-                    return "translate(" + x(parser(d.values[idx].date)) + "," + y(d.values[idx].price) + ")";
+                    return "translate(" + x(parser(d.values[idx].date)) + "," + y(d.values[idx].value) + ")";
                 });
             });
         }
@@ -513,9 +549,9 @@
     // Create bar chart
 
     d3.csv('./avgTotals.csv', function(d) {
-        totalMap.set([d.region, d.year], d.totalVol)
+        totalMap.set([d.region, d.year], [d.avg, d.totalVol])
     }, function (error, rows) {
-        updateBarChart();
+        updateBarChart(true);
     });
     
     // Initialize bar chart
@@ -527,80 +563,199 @@
 
     function createTotalData() {
         totalData = [];
-        regionNames.forEach(function (region) {
-            totalData.push({
-                region: region,
-                totalVol: +totalMap.get([region, currYear])
+        if (noneSelected) {
+            regionNames.forEach(function (region) {
+                totalData.push({
+                    region: region,
+                    value: +totalMap.get([region, barYear])[barMode]
+                })
             })
-        })
+        } else {
+            regionNames.forEach(function (region) {
+                if (selectedCities[region]) {
+                    totalData.push({
+                        region: region,
+                        value: +totalMap.get([region, barYear])[barMode]
+                    })
+                }
+            })
+        }
     }
+
+    yearBar.append("select")
+        .attr("class", "years")
+        .selectAll('option')
+            .data([2019, 2018, 2017, 2016])
+            .enter()
+            .append('option')
+        .text(function (d) { 
+            return d; 
+        })
+        .attr("value", function (d) { 
+            return d; 
+        })
+
+    yearBar.on("change", function(d) {
+        var val = d3.select(this)
+            .select("select")
+            .property("value");
+            barYear = val;
+        d3.selectAll('input').property('checked', false);
+        updateBarChart(false)
+    });
+
+    valueVol = yearBar.append("select")
+        .attr("id", "valBar")
+        .selectAll('option')
+            .data([{"title": "Yearly Price", "value": 0}, 
+                {"title": "Total Volume", "value": 1}])
+            .enter()
+            .append('option')
+        .text(function (d) { 
+            return d.title; 
+        })
+        .attr("value", function (d) { 
+            return d.value; 
+    })
+
+    yearBar.select("#valBar").on("change", function (d) {
+        var newMode = +d3.select(this)
+                .property("value");
+        barMode = newMode
+        d3.selectAll('input').property('checked', false);
+        updateBarChart(false)
+    })
 
     var barChartWidth = pageWidth - margin.left - margin.right
     var barChartHeight = pageHeight - margin.top - margin.bottom
-    function updateBarChart() {
+    function updateBarChart(init) {
         createTotalData();
         // New title
         barChart.select("#title").remove();
-            barChart.append("text")
+        var titleText = "🥑Average Yearly Volume of Avocados Sold (" + barYear + ")🥑";
+        if (barMode == PRICE)
+            titleText = "🥑Average Yearly Prices (" + barYear + ")🥑"; 
+        barChart.append("text")
                     .attr('x', (barChartWidth / 2))             
                     .attr('y', 0 - (margin.top / 3))
                     .attr('text-anchor', 'middle') 
                     .attr('id', 'title') 
                     .style('font-size', '16px')
-                    .text("🥑Average Yearly Number of Avocados Sold (" + currYear + ")🥑")
+                    .text(titleText)
 
         var xScale = d3.scaleBand().rangeRound([0, barChartWidth]).padding(0.1);
         var yScale = d3.scaleLinear().rangeRound([barChartHeight, 0]);
 
         xScale.domain(totalData.map(function(d) { return d.region; }));
-        yScale.domain([d3.min(totalData, function(d) { return d.totalVol; }) - 1000000, d3.max(totalData, function(d) { return d.totalVol; })]);
+        var minDomain = d3.min(totalData, function(d) { return d.value; }) - 0.1
+        if (barMode == VOL) {
+            minDomain = 0
+        }
+        yScale.domain([minDomain, d3.max(totalData, function(d) { return d.value; })]);
 
         // Add the bars
-        barChart.selectAll(".bar")
+        // Tooltip
+        var tip = d3.select('#tip')
+        tip.style('opacity', 0);
+
+        var bars;
+        if (!init) {
+            d3.selectAll(".bar").remove();
+        }
+
+        bars = barChart.selectAll(".bar")
             .data(totalData)
             .enter()
             .append("rect")
                 .attr("class", "bar")
-                .attr("fill", "#90983B")
                 .attr("x", function(d) { return xScale(d.region); })
-                .attr("y", function(d) { return yScale(d.totalVol); })
+                .attr("y", function(d) { return yScale(d.value); })
                 .attr("width", xScale.bandwidth())
-                .attr("height", function(d) { return barChartHeight - yScale(d.totalVol); })
-            .on("mouseover", function(d) {
-                d3.select(this).attr("fill", "green")
-            }).on("mouseout", function(d) {
-                d3.select(this).attr("fill", "#90983B")
-            });
+                .attr("height", function(d) { return barChartHeight - yScale(d.value); })
+                // .attr("fill", "#90983B")
+                .attr("fill", function(d) {return lineColor(d.region)})
+
+        // Mouseover handling
+        bars.on("mouseover", function(d) {
+            d3.select(this).attr("opacity", 0.5)
+            tip.style('opacity', 0.9);
+        })
+        .on("mousemove", function (d) {
+            var value = '$' + formatComma(d.value);
+            if (barMode == VOL) {
+                value = formatComma(d.value);
+            }
+            tip.html(d.region + "<hr>" + value)
+                .style('left', d3.mouse(this)[0] - 10 + 'px')
+                .style('top', d3.mouse(this)[1] + 50 + 'px');
+        })
+        .on("mouseout", function(d) {
+                d3.select(this).attr("opacity", 1)
+                tip.style('opacity', 0);
+        });
 
         // Append x axis
-        barChart.append("g")
-            .attr("class", "axis axis--x")
-            .attr("transform", "translate(0," + barChartHeight + ")")
-            .call(d3.axisBottom(xScale))
-            .selectAll("text")
-            .attr("y", 0)
-            .attr("x", 9)
-            .attr("dy", ".35em")
-            .attr("transform", "rotate(65)")
-            .style("text-anchor", "start")
+        if (init) {
+            barChart.append("g")
+                .attr("class", "axis axis--x")
+                .attr("transform", "translate(0," + barChartHeight + ")")
+                .call(d3.axisBottom(xScale))
+                .selectAll("text")
+                .attr("y", 0)
+                .attr("x", 9)
+                .attr("dy", ".35em")
+                .attr("transform", "rotate(65)")
+                .style("text-anchor", "start")
+        } else {
+            barChart.select(".axis--x")
+                .call(d3.axisBottom(xScale))
+                .selectAll("text")
+                .attr("y", 0)
+                .attr("x", 9)
+                .attr("dy", ".35em")
+                .attr("transform", "rotate(65)")
+                .style("text-anchor", "start")
+
+        }
 
         // Append y axis
-        barChart.append("g")
-            .attr("class", "axis axis--y")
-            .call(d3.axisLeft(yScale))
-            .append("text")
-            .attr("transform", "rotate(-90)")
-            .attr("y", 6)
-            .attr("dy", ".71em")
-            .style("text-anchor", "end")
-            .text("Yearly Avocados Sold");
+        var axisText = "Yearly Avocado Average Price (USD)"
+        if (barMode == VOL)
+            axisText = "Yearly Avocados Sold"
+        if (init) {
+            barChart.append("g")
+                .attr("class", "axis axis--y")
+                .call(d3.axisLeft(yScale))
+                .append("text")
+                .attr("id", "axisText")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text(axisText);
+        } else {
+                // Redraw Y axis
+                barChart.selectAll(".axis--y")
+                    .transition()
+                    .duration(750)
+                    .call(d3.axisLeft(yScale))
+                barChart.selectAll("#axisText").remove()
+                barChart.append("text")
+                .attr("id", "axisText")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .style("fill", "black")
+                .text(axisText);
+            }
     }
 
     sortMenu.on("change", function() {
         var xScale = d3.scaleBand().rangeRound([0, barChartWidth]).padding(0.1);
         var xScale0 = xScale.domain(totalData.sort(this.checked
-		? function(a, b) { console.log("Sorting"); return b.totalVol - a.totalVol; }
-		: function(a, b) { console.log("Alphabetizing"); return d3.ascending(a.region, b.region); })
+		? function(a, b) { return b.value - a.value; }
+		: function(a, b) { return d3.ascending(a.region, b.region); })
 		.map(function(d) { return d.region; }))
 		.copy();
 

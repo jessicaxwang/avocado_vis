@@ -1,6 +1,7 @@
 html, body {
     padding: 0;
     margin: 0;
+    background-color: white;
 }
 
 .states {
@@ -19,8 +20,12 @@ html, body {
 	display: inline-block;
 }
 
-#barChart {
+/* #barChart {
     float: left;
+} */
+
+#axisText {
+    font-size: 10px;
 }
 
 path { 
@@ -32,6 +37,7 @@ path {
 circle { 
   stroke-width: 1;
 }
+
 .axis path,
 .axis line {
   fill: none;
@@ -39,6 +45,7 @@ circle {
   stroke-width: 1;
   shape-rendering: crispEdges;
 }
+
 .legend, .label, .hover-text{
     font-size: x-small;
     background-color: white;
@@ -46,10 +53,26 @@ circle {
 
 text {
     font-family: source-sans-pro, sans-serif;
-    font-weight: normal;
+    font-weight: lighter;
     fill: #0F2048;
 }
 
+label {
+    font-family: source-sans-pro, sans-serif;
+    font-weight: lighter;
+    font-size: small;
+}
 
-
+#tip {	
+    position: relative;			
+    text-align: center;			
+    width: 150px;					
+    height: 43px;					
+    padding: 2px;				
+    font: 12px sans-serif;		
+    background: lightsteelblue;	
+    border: 0px;		
+    border-radius: 8px;			
+    pointer-events: none;			
+}
 
