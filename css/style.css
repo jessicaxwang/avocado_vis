@@ -36,6 +36,7 @@ path {
 circle { 
   stroke-width: 1;
 }
+
 .axis path,
 .axis line {
   fill: none;
@@ -43,6 +44,7 @@ circle {
   stroke-width: 1;
   shape-rendering: crispEdges;
 }
+
 .legend, .label, .hover-text{
     font-size: x-small;
     background-color: white;
@@ -50,7 +52,7 @@ circle {
 
 text {
     font-family: source-sans-pro, sans-serif;
-    font-weight: normal;
+    font-weight: lighter;
     fill: #0F2048;
 }
 
