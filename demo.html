@@ -240,6 +240,7 @@
             d3.select('#map').select("svg").selectAll('.avoIcon')
                 .style('stroke-width', 0)
                 .attr('xlink:href', './avocado.png')
+            d3.selectAll('input').property('checked', false);
             updateLineChart(false);
             updateBarChart(false);
         });
