@@ -531,8 +531,12 @@
                     bisect = d3.bisector(function (d) { return parser(d.date); }).left;
                     idx = bisect(d.values, xDate);
 
+                    var lineText = formatComma(y.invert(y(d.values[idx].value)).toFixed(2))
+                    if (lineMode == PRICE) {
+                        lineText = '$' + formatComma(y.invert(y(d.values[idx].value)).toFixed(2))
+                    }
                     d3.select(this).select('text')
-                    .text(formatComma(y.invert(y(d.values[idx].value)).toFixed(2)));
+                    .text(lineText);
 
                     d3.select(".mouse-line")
                     .attr("d", function () {
