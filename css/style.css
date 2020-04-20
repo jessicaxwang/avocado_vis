@@ -56,6 +56,12 @@ text {
     fill: #0F2048;
 }
 
+label {
+    font-family: source-sans-pro, sans-serif;
+    font-weight: lighter;
+    font-size: small;
+}
+
 
 
 

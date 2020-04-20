@@ -17,9 +17,8 @@
         <div id ='buttonArea'></div>
     </div>
     <div id='barChart'>
-        <label><input type="checkbox" id='sort'>Sort values</label>
         <div id ='yearBar'></div>
-        <!-- <div id ='sortDropdown'></div> -->
+        <label><input type="checkbox" id='sort'>Sort values</label>
     </div>
     <script>
         const PRICE = 0;
@@ -249,24 +248,6 @@
             }
             return true;
         }   
-
-        // const options = [
-        //     {label: "Alphabetical", value: (a, b) => a.name.localeCompare(b.name)},
-        //     {label: "Frequency, ascending", value: (a, b) => a.value - b.value},
-        //     {label: "Frequency, descending", value: (a, b) => b.value - a.value}
-        // ];
-
-        // sortMenu.append("select")
-        // .selectAll('option')
-        //     .data(options)
-        //     .enter()
-        //     .append('option')
-        // .text(function (d) { 
-        //     return d.label; 
-        // })
-        // .attr("value", function (d) { 
-        //     return d.value; 
-        // })
 
 // ------------------------------------------- LINE CHART -------------------------------------------- //
 
