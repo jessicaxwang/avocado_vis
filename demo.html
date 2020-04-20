@@ -10,11 +10,12 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div id='map'></div>
-    <div id='lineChart'>
-        <!-- <div id ='regionDropdown'></div> -->
-        <div id ='yearDropdown'></div>
+    <div id='map'>
         <div id ='buttonArea'></div>
+    </div>
+    <div id='lineChart'>
+        <div id ='regionDropdown'></div>
+        <div id ='yearDropdown'></div>
     </div>
     <div id='barChart'>
         <div id ='yearBar'></div>
@@ -156,8 +157,12 @@
                         selectedCities[d.region] = !selectedCities[d.region]
                         if (noCitiesSelected()) {
                             noneSelected = true;
+                        } else {
+                            noneSelected = false;
                         }
+                        d3.selectAll('input').property('checked', false);
                         updateLineChart(false)
+                        updateBarChart(false)
                     })
                 
                     // Initialize region menu
@@ -221,7 +226,6 @@
                     })
 
                     yearMenu.select("#valueVol").on("change", function (d) {
-                        console.log("CHANGED")
                         var newMode = +d3.select(this)
                                 .property("value");
                         lineMode = newMode
@@ -239,6 +243,7 @@
                 .style('stroke-width', 0)
                 .attr('xlink:href', './avocado.png')
             updateLineChart(false);
+            updateBarChart(false);
         });
 
         function noCitiesSelected() {
@@ -281,7 +286,6 @@
                 valueDict.forEach(function (monthObj) {
                         monthObj["Total U.S."] = valuePerRegion[months.indexOf(monthObj.month)];
                 })
-                noneSelected = false;
             } else {
                 d3.keys(selectedCities).forEach(function (d) {
                     if (selectedCities[d]) {
@@ -396,6 +400,7 @@
                     .attr("transform", "translate(0," + lineChartHeight + ")")
                     .call(d3.axisBottom(x).tickFormat(d3.timeFormat(xFormat)));
             }
+
             // Append y axis
             if (init) {
                 lineChart.append("g")
@@ -560,12 +565,25 @@
 
     function createTotalData() {
         totalData = [];
-        regionNames.forEach(function (region) {
-            totalData.push({
-                region: region,
-                value: +totalMap.get([region, barYear])[barMode]
+        console.log("noneselected: " + noneSelected)
+        if (noneSelected) {
+            regionNames.forEach(function (region) {
+                totalData.push({
+                    region: region,
+                    value: +totalMap.get([region, barYear])[barMode]
+                })
             })
-        })
+        } else {
+            console.log("other one")
+            regionNames.forEach(function (region) {
+                if (selectedCities[region]) {
+                    totalData.push({
+                        region: region,
+                        value: +totalMap.get([region, barYear])[barMode]
+                    })
+                }
+            })
+        }
     }
 
     yearBar.append("select")
@@ -691,6 +709,13 @@
         } else {
             barChart.select(".axis--x")
                 .call(d3.axisBottom(xScale))
+                .selectAll("text")
+                .attr("y", 0)
+                .attr("x", 9)
+                .attr("dy", ".35em")
+                .attr("transform", "rotate(65)")
+                .style("text-anchor", "start")
+
         }
 
         // Append y axis
