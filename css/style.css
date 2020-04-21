@@ -65,9 +65,7 @@ label {
 
 .tooltip {	
     position: relative;			
-    text-align: center;			
-    width: 150px;					
-    height: 43px;					
+    text-align: center;								
     padding: 2px;				
     font: 12px sans-serif;		
     background: lightsteelblue;	
