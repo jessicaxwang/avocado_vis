@@ -19,9 +19,10 @@
         <div id ='yearDropdown'></div>
     </div>
     <div id='barChart'>
-        <div id ='yearBar'></div>
+        <div id ='yearBar'>
+            <div class='tooltip' id='tip'></div>
+        </div>
         <label><input type="checkbox" id='sort'>Sort values</label>
-        <div class='tooltip' id='tip'></div>
     </div>
     <script>
         const PRICE = 0;
@@ -686,10 +687,8 @@
         // Tooltip
         var tip = d3.select('#tip')
         tip.style('opacity', 0)
-          .style('height', pageWidth/15  + 'px')
+          .style('height', pageWidth/13  + 'px')
           .style('width', pageWidth/10 +'px')
-        //   .style('font', (12/864)*pageWidth + "px sans-serif")
-          .style('line-height', pageWidth/35 + 'px')
 
 
         var bars;
@@ -706,7 +705,6 @@
                 .attr("y", function(d) { return yScale(d.value); })
                 .attr("width", xScale.bandwidth())
                 .attr("height", function(d) { return barChartHeight - yScale(d.value); })
-                // .attr("fill", "#90983B")
                 .attr("fill", function(d) {return lineColor(d.region)})
 
         // Mouseover handling
