@@ -15,7 +15,6 @@
         <div id='maptip'></div>
     </div>
     <div id='lineChart'>
-        <div id ='regionDropdown'></div>
         <div id ='yearDropdown'></div>
     </div>
     <div id='barChart'>
@@ -34,7 +33,6 @@
         var barYear = 2019;
         var barMode = PRICE;
         var valueDict = [];
-        var regionMenu = d3.select("#regionDropdown");
         var yearMenu = d3.select('#yearDropdown');
         var sortMenu = d3.select('#sort');
         var yearBar = d3.select('#yearBar');
@@ -187,27 +185,6 @@
                         updateLineChart(false)
                         updateBarChart(false)
                     })
-                
-                    // Initialize region menu
-                    // regionMenu.append("select")
-                    //     .selectAll('option')
-                    //         .data(d3.keys(selectedCities).sort())
-                    //         .enter()
-                    //         .append('option')
-                    //     .text(function (d) { 
-                    //         return d; 
-                    //     })
-                    //     .attr("value", function (d) { 
-                    //         return d; 
-                    //     })
-                    
-                    // regionMenu.on("change", function(d) {
-                    //     var val = d3.select(this)
-                    //         .select("select")
-                    //         .property("value");
-                    //     selectedCities[val] = true;
-                    //     updateLineChart(false)
-                    // })
 
                     // Initialize year menu
                     yearMenu.append("select")
