@@ -19,9 +19,9 @@
     </div>
     <div id='barChart'>
         <div id ='yearBar'>
-            <div class='tooltip' id='tip'></div>
+            <label><input type="checkbox" id='sort'>Sort values</label>
         </div>
-        <label><input type="checkbox" id='sort'>Sort values</label>
+        <div class='tooltip' id='tip'></div>
     </div>
     <script>
         const PRICE = 0;
@@ -71,12 +71,12 @@
                     .projection(projection);
     
         // Create line chart
-        var margin = {left: 100, right: 50, top: 50, bottom: 100};
+        var margin = {left: 70, right: 40, top: 50, bottom: 100};
         var lineChartWidth = pageWidth / 2.5 ; 
-        var lineChartHeight = pageHeight / 1.3;
+        var lineChartHeight = pageHeight / 3;
 
         var lineChart = d3.select("#lineChart").append("svg")
-            .attr('height', pageHeight)
+            .attr('height', pageHeight / 2)
             .attr('width', pageWidth / 2)
         .append("g")
             .attr("transform", "translate(" + 60 + "," + margin.top + ")");
@@ -120,7 +120,7 @@
 
                 data.forEach(function(d){ selectedCities[d.region] = false })
 
-                tip = d3.select('#maptip')
+                var tip = d3.select('#maptip')
 
                 var imgWidth = pageWidth/40
                 var imgHeight = pageWidth/40
@@ -154,7 +154,7 @@
                     })
                     .on('mousemove', function(d){
                         tip.html(d.region)
-                            .style('left', d3.mouse(this)[0] - 10+'px')
+                            .style('left', d3.mouse(this)[0] - 10 +'px')
                             .style('top', d3.mouse(this)[1] + 50 + 'px')
                     })
                     .on('mouseout', function (d) { 
@@ -181,6 +181,8 @@
                         } else {
                             noneSelected = false;
                         }
+
+                        console.log("FALSING 185")
                         d3.selectAll('input').property('checked', false);
                         updateLineChart(false)
                         updateBarChart(false)
@@ -242,6 +244,7 @@
             d3.select('#map').select("svg").selectAll('.avoIcon')
                 .style('stroke-width', 0)
                 .attr('xlink:href', './avocado.png')
+            console.log("FALSING 247")
             d3.selectAll('input').property('checked', false);
             updateLineChart(false);
             updateBarChart(false);
@@ -563,8 +566,8 @@
     
     // Initialize bar chart
     var barChart = d3.select("#barChart").append("svg")
-            .attr("width", pageWidth)
-            .attr("height", pageHeight)
+            .attr("width", pageWidth / 2)
+            .attr("height", pageHeight / 2)
 	        .append("g")
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -589,7 +592,7 @@
         }
     }
 
-    yearBar.append("select")
+    yearSelect = yearBar.append("select")
         .attr("class", "years")
         .selectAll('option')
             .data([2019, 2018, 2017, 2016])
@@ -602,11 +605,12 @@
             return d; 
         })
 
-    yearBar.on("change", function(d) {
+    yearSelect.on("change", function(d) {
         var val = d3.select(this)
             .select("select")
             .property("value");
             barYear = val;
+        console.log("FALSING 613")
         d3.selectAll('input').property('checked', false);
         updateBarChart(false)
     });
@@ -629,12 +633,14 @@
         var newMode = +d3.select(this)
                 .property("value");
         barMode = newMode
+        console.log("FALSING 636")
         d3.selectAll('input').property('checked', false);
         updateBarChart(false)
     })
 
-    var barChartWidth = pageWidth - margin.left - margin.right
-    var barChartHeight = pageHeight - margin.top - margin.bottom
+    var barChartWidth = pageWidth / 2 - margin.left - margin.right
+    var barChartHeight = pageHeight / 2 - margin.top - margin.bottom
+
     function updateBarChart(init) {
         createTotalData();
         // New title
@@ -664,8 +670,8 @@
         // Tooltip
         var tip = d3.select('#tip')
         tip.style('opacity', 0)
-          .style('height', pageWidth/13  + 'px')
-          .style('width', pageWidth/10 +'px')
+            .style('height', pageWidth/25  + 'px')
+            .style('width', pageWidth/10 +'px')
 
 
         var bars;
@@ -695,12 +701,12 @@
                 value = formatComma(d.value);
             }
             tip.html(d.region + "<hr>" + value)
-                .style('left', d3.mouse(this)[0] - 10 + 'px')
-                .style('top', d3.mouse(this)[1] + 50 + 'px');
+                .style('left', d3.mouse(this)[0] + 'px')
+                .style('top', d3.mouse(this)[1] + 'px');
         })
         .on("mouseout", function(d) {
                 d3.select(this).attr("opacity", 1)
-                tip.style('opacity', 0);
+                tip.style('opacity', 0)
         });
 
         // Append x axis
@@ -728,7 +734,7 @@
         }
 
         // Append y axis
-        var axisText = "Yearly Avocado Average Price (USD)"
+        var axisText = "Yearly Average Price (USD)"
         if (barMode == VOL)
             axisText = "Yearly Avocados Sold"
         if (init) {
@@ -761,6 +767,7 @@
     }
 
     sortMenu.on("change", function() {
+        console.log("checked? " + this.checked)
         var xScale = d3.scaleBand().rangeRound([0, barChartWidth]).padding(0.1);
         var xScale0 = xScale.domain(totalData.sort(this.checked
 		? function(a, b) { return b.value - a.value; }

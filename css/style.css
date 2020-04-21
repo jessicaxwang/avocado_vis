@@ -20,12 +20,13 @@ html, body {
 	display: inline-block;
 }
 
-/* #barChart {
-    float: left;
-} */
+#barChart {
+    width: 50%;
+    display: inline-block;
+}
 
 #axisText {
-    font-size: 10px;
+    font-size: 9px;
 }
 
 path { 
@@ -60,10 +61,10 @@ text {
 label {
     font-family: source-sans-pro, sans-serif;
     font-weight: lighter;
-    font-size: small;
+    font-size: x-small;
 }
 
-.tooltip {	
+#tip {	
     position: relative;			
     text-align: center;								
     padding: 2px;				
