@@ -63,11 +63,22 @@ label {
     font-size: small;
 }
 
-#tip {	
+.tooltip {	
     position: relative;			
     text-align: center;			
     width: 150px;					
     height: 43px;					
+    padding: 2px;				
+    font: 12px sans-serif;		
+    background: lightsteelblue;	
+    border: 0px;		
+    border-radius: 8px;			
+    pointer-events: none;			
+}
+
+#maptip {	
+    position: relative;			
+    text-align: center;			
     padding: 2px;				
     font: 12px sans-serif;		
     background: lightsteelblue;	
