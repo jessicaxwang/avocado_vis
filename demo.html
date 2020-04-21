@@ -12,6 +12,7 @@
 <body>
     <div id='map'>
         <div id ='buttonArea'></div>
+        <div id='maptip'></div>
     </div>
     <div id='lineChart'>
         <div id ='regionDropdown'></div>
@@ -99,6 +100,13 @@
             addCityMarkers(rows)
         })
 
+        d3.select('#maptip')
+          .style('opacity', 0)
+          .style('height', pageWidth/35 + 'px')
+          .style('width', pageWidth/8 +'px')
+          .style('font', (12/864)*pageWidth + "px sans-serif")
+          .style('line-height', pageWidth/35 + 'px')
+
         selectedCities = {}
         function addCityMarkers(data){
             var mapSvg = d3.select('#map').append('svg')
@@ -113,8 +121,10 @@
 
                 data.forEach(function(d){ selectedCities[d.region] = false })
 
-                var imgWidth = 25
-                var imgHeight = 25
+                tip = d3.select('#maptip')
+
+                var imgWidth = pageWidth/40
+                var imgHeight = pageWidth/40
                 mapSvg.selectAll('img')
                     .data(data)
                     .enter()
@@ -127,17 +137,31 @@
                     .attr('height', imgHeight)
                     .style('borderStyle', 'solid')
                     .on('mouseover', function(d){ 
-                        imgWidth = 50
-                        imgHeight = 50
+                        tip.style('opacity', 0.9)
+
+                        if (d.region == "Miami/Ft. Lauderdale" || d.region == "New Orleans/Mobile"){
+                            tip.style('line-height', (12/864)*pageWidth + 'px')
+                        } else{
+                            tip.style('line-height', pageWidth/35 + 'px')
+                        }
+
+                        imgWidth = imgWidth * 1.5
+                        imgHeight = imgHeight * 1.5
                         d3.select(this)
                           .attr('x',function(d){ return projection([d.long, d.lat])[0] - (imgWidth/2)})
                           .attr('y',function(d){ return projection([d.long, d.lat])[1] - (imgHeight/2)})
                           .attr('width', imgWidth)
                           .attr('height', imgHeight)
                     })
+                    .on('mousemove', function(d){
+                        tip.html(d.region)
+                            .style('left', d3.mouse(this)[0] - 10+'px')
+                            .style('top', d3.mouse(this)[1] + 50 + 'px')
+                    })
                     .on('mouseout', function (d) { 
-                        imgWidth = 25
-                        imgHeight = 25
+                        tip.style('opacity', 0)
+                        imgWidth = pageWidth/40
+                        imgHeight = pageWidth/40
                         d3.select(this)
                           .attr('x',function(d){ return projection([d.long, d.lat])[0] - (imgWidth/2)})
                           .attr('y',function(d){ return projection([d.long, d.lat])[1] - (imgHeight/2)})
