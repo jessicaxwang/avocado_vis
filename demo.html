@@ -685,7 +685,12 @@
         // Add the bars
         // Tooltip
         var tip = d3.select('#tip')
-        tip.style('opacity', 0);
+        tip.style('opacity', 0)
+          .style('height', pageWidth/15  + 'px')
+          .style('width', pageWidth/10 +'px')
+        //   .style('font', (12/864)*pageWidth + "px sans-serif")
+          .style('line-height', pageWidth/35 + 'px')
+
 
         var bars;
         if (!init) {
