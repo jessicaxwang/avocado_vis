@@ -18,10 +18,10 @@
         <div id ='yearDropdown'></div>
     </div>
     <div id='barChart'>
+        <div class="tooltip" id="tip"></div> 
         <div id ='yearBar'>
-            <div class='tooltip' id='tip'></div>
+            <label><input type="checkbox" id='sort'>Sort values</label>
         </div>
-        <label><input type="checkbox" id='sort'>Sort values</label>
     </div>
     <script>
         const PRICE = 0;
@@ -71,12 +71,13 @@
                     .projection(projection);
     
         // Create line chart
-        var margin = {left: 100, right: 50, top: 50, bottom: 100};
-        var lineChartWidth = pageWidth / 2.5 ; 
-        var lineChartHeight = pageHeight / 1.3;
+        var margin = {left: 70, right: 40, top: 50, bottom: 100};
+        // var lineChartWidth = pageWidth / 2.5;
+        var lineChartWidth = pageWidth / 3 ; 
+        var lineChartHeight = pageHeight / 3;
 
         var lineChart = d3.select("#lineChart").append("svg")
-            .attr('height', pageHeight)
+            .attr('height', pageHeight / 2)
             .attr('width', pageWidth / 2)
         .append("g")
             .attr("transform", "translate(" + 60 + "," + margin.top + ")");
@@ -120,7 +121,7 @@
 
                 data.forEach(function(d){ selectedCities[d.region] = false })
 
-                tip = d3.select('#maptip')
+                var tip = d3.select('#maptip')
 
                 var imgWidth = pageWidth/40
                 var imgHeight = pageWidth/40
@@ -154,7 +155,7 @@
                     })
                     .on('mousemove', function(d){
                         tip.html(d.region)
-                            .style('left', d3.mouse(this)[0] - 10+'px')
+                            .style('left', d3.mouse(this)[0] - 10 +'px')
                             .style('top', d3.mouse(this)[1] + 50 + 'px')
                     })
                     .on('mouseout', function (d) { 
@@ -181,6 +182,7 @@
                         } else {
                             noneSelected = false;
                         }
+
                         d3.selectAll('input').property('checked', false);
                         updateLineChart(false)
                         updateBarChart(false)
@@ -211,8 +213,8 @@
                             updateLineChart(false);
                         });
 
-                    valueVol = yearMenu.append("select")
-                        .attr("id", "valueVol")
+                    valBar = yearMenu.append("select")
+                        .attr("id", "valBar")
                         .selectAll('option')
                             .data([{"title": "Average Price", "value": 0}, 
                                    {"title": "Average Volume", "value": 1}])
@@ -225,7 +227,7 @@
                             return d.value; 
                     })
 
-                    yearMenu.select("#valueVol").on("change", function (d) {
+                    yearMenu.select("#valBar").on("change", function (d) {
                         var newMode = +d3.select(this)
                                 .property("value");
                         lineMode = newMode
@@ -454,13 +456,13 @@
                         value: d.values[d.values.length - 1]
                     }
                 })
-                .attr("cx", lineChartWidth - 50)
+                .attr("cx", lineChartWidth + 40)
                 .attr("cy", function(d,i){ return i * 20; })
                 .attr("r", 5)
                 .style("fill", function(d){ return lineColor(d.name)})
 
                 value.append('text')
-                .attr('x', lineChartWidth - 40)
+                .attr('x', lineChartWidth + 50)
                 .attr('y', function(d, i) {
                     return (i * 20);
                 })
@@ -468,7 +470,7 @@
                     return d.name;
                 })
                 .attr("dy", ".35em")
-                .attr("font-size", "11px")
+                .attr("font-size", "10.5px")
                 .style("fill", "black");
 
             // Add mouse line
@@ -563,8 +565,8 @@
     
     // Initialize bar chart
     var barChart = d3.select("#barChart").append("svg")
-            .attr("width", pageWidth)
-            .attr("height", pageHeight)
+            .attr("width", pageWidth / 2)
+            .attr("height", pageHeight / 2)
 	        .append("g")
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -591,27 +593,27 @@
 
     yearBar.append("select")
         .attr("class", "years")
+        .attr("id", "yearSelect")
         .selectAll('option')
-            .data([2019, 2018, 2017, 2016])
+            .data(["2019", "2018", "2017", "2016"])
             .enter()
             .append('option')
         .text(function (d) { 
             return d; 
         })
         .attr("value", function (d) { 
-            return d; 
+            return +d; 
         })
 
-    yearBar.on("change", function(d) {
+    d3.select("#yearSelect").on("change", function(d) {
         var val = d3.select(this)
-            .select("select")
             .property("value");
             barYear = val;
         d3.selectAll('input').property('checked', false);
         updateBarChart(false)
     });
 
-    valueVol = yearBar.append("select")
+    valBar = yearBar.append("select")
         .attr("id", "valBar")
         .selectAll('option')
             .data([{"title": "Yearly Price", "value": 0}, 
@@ -633,8 +635,9 @@
         updateBarChart(false)
     })
 
-    var barChartWidth = pageWidth - margin.left - margin.right
-    var barChartHeight = pageHeight - margin.top - margin.bottom
+    var barChartWidth = pageWidth / 2 - margin.left - margin.right
+    var barChartHeight = pageHeight / 2 - margin.top - margin.bottom
+
     function updateBarChart(init) {
         createTotalData();
         // New title
@@ -664,9 +667,9 @@
         // Tooltip
         var tip = d3.select('#tip')
         tip.style('opacity', 0)
-          .style('height', pageWidth/13  + 'px')
-          .style('width', pageWidth/10 +'px')
-
+          .style('height', pageWidth/15 + 'px')
+          .style('width', pageWidth/8 +'px')
+          .style('line-height', pageWidth/35 + 'px')
 
         var bars;
         if (!init) {
@@ -694,13 +697,19 @@
             if (barMode == VOL) {
                 value = formatComma(d.value);
             }
+            if (d.region == "Miami/Ft. Lauderdale" || d.region == "New Orleans/Mobile"){
+                tip.style('line-height', (12/864) * pageWidth + 'px')
+            } else{
+                tip.style('line-height', pageWidth/35 + 'px')
+            }
+
             tip.html(d.region + "<hr>" + value)
-                .style('left', d3.mouse(this)[0] - 10 + 'px')
-                .style('top', d3.mouse(this)[1] + 50 + 'px');
+                .style('left', d3.event.pageX - 50 + 'px')
+                .style('top', d3.event.pageY - 100 + 'px');
         })
         .on("mouseout", function(d) {
                 d3.select(this).attr("opacity", 1)
-                tip.style('opacity', 0);
+                tip.style('opacity', 0)
         });
 
         // Append x axis
@@ -728,7 +737,7 @@
         }
 
         // Append y axis
-        var axisText = "Yearly Avocado Average Price (USD)"
+        var axisText = "Yearly Average Price (USD)"
         if (barMode == VOL)
             axisText = "Yearly Avocados Sold"
         if (init) {
