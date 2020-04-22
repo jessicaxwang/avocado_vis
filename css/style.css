@@ -87,3 +87,7 @@ label {
     pointer-events: none;			
 }
 
+rect {
+    opacity: 0.2;
+}
+
