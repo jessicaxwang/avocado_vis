@@ -41,6 +41,17 @@
         var pageHeight = window.innerHeight;
         var totalMap = d3.map();
         var totalData = [];
+
+
+        // // addEventListener version
+        // document.addEventListener('selectionchange', () => {
+        // console.log(document.getSelection());
+        // });
+
+        // // onselectionchange version
+        // document.onselectionchange = () => {
+        // console.log(document.getSelection());
+        // };
     
 
         regionColors = {}
@@ -107,17 +118,45 @@
           .style('font', (12/864)*pageWidth + "px sans-serif")
           .style('line-height', pageWidth/35 + 'px')
 
+
         selectedCities = {}
         function addCityMarkers(data){
             var mapSvg = d3.select('#map').append('svg')
             .attr('width', pageWidth /2)
             .attr('height', pageHeight)
-    
+            .on('mousedown', mousedown)
+            .on('mouseup', mouseup)
+                
+            function mousedown() {
+                var m = d3.mouse(this);
+                rect = mapSvg.append('rect')
+                        .attr("x", m[0])
+                        .attr("y", m[1])
+                        .attr("height", 0)
+                        .attr("width", 0);
+
+                mapSvg.on('mousemove', mousemove);
+            }
+            function mousemove(d){
+                var m = d3.mouse(this);     
+                rect.attr("width", Math.max(0, m[0] - +rect.attr("x")))
+                    .attr("height", Math.max(0, m[1] - +rect.attr("y")));
+
+                mapSvg.selectAll('image').each(function(d, i){
+                        console.log(d.region)
+                    })
+            }
+            function mouseup() {
+                mapSvg.on("mousemove", null);
+                mapSvg.select('rect').remove();
+            }
+
             d3.json("js/us.json", function(error, us){
                 mapSvg.append("path")
                     .attr("class", "states")
                     .datum(topojson.feature(us, us.objects.states))
-                    .attr("d", path);
+                    .attr("d", path)
+                
 
                 data.forEach(function(d){ selectedCities[d.region] = false })
 
@@ -257,6 +296,7 @@
             return true;
         }   
 
+      
 // ------------------------------------------- LINE CHART -------------------------------------------- //
 
         var regionPrices = d3.map()
