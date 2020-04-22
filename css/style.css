@@ -65,7 +65,7 @@ label {
 }
 
 #tip {	
-    position: relative;			
+    position: absolute;			
     text-align: center;								
     padding: 2px;				
     font: 11px sans-serif;		

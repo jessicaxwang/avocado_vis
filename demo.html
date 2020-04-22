@@ -72,7 +72,8 @@
     
         // Create line chart
         var margin = {left: 70, right: 40, top: 50, bottom: 100};
-        var lineChartWidth = pageWidth / 2.5 ; 
+        // var lineChartWidth = pageWidth / 2.5;
+        var lineChartWidth = pageWidth / 3 ; 
         var lineChartHeight = pageHeight / 3;
 
         var lineChart = d3.select("#lineChart").append("svg")
@@ -455,13 +456,13 @@
                         value: d.values[d.values.length - 1]
                     }
                 })
-                .attr("cx", lineChartWidth - 50)
+                .attr("cx", lineChartWidth + 40)
                 .attr("cy", function(d,i){ return i * 20; })
                 .attr("r", 5)
                 .style("fill", function(d){ return lineColor(d.name)})
 
                 value.append('text')
-                .attr('x', lineChartWidth - 40)
+                .attr('x', lineChartWidth + 50)
                 .attr('y', function(d, i) {
                     return (i * 20);
                 })
@@ -469,7 +470,7 @@
                     return d.name;
                 })
                 .attr("dy", ".35em")
-                .attr("font-size", "11px")
+                .attr("font-size", "10.5px")
                 .style("fill", "black");
 
             // Add mouse line
@@ -703,8 +704,8 @@
             }
 
             tip.html(d.region + "<hr>" + value)
-                .style('left', d3.mouse(this)[0] - 10 + 'px')
-                .style('top', d3.mouse(this)[1] + 50 + 'px');
+                .style('left', d3.event.pageX - 50 + 'px')
+                .style('top', d3.event.pageY - 100 + 'px');
         })
         .on("mouseout", function(d) {
                 d3.select(this).attr("opacity", 1)
