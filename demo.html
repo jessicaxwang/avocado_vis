@@ -16,6 +16,7 @@
     </div>
     <div id='lineChart'>
         <div id ='yearDropdown'></div>
+        <div class="tooltip" id="priceTip"></div>
     </div>
     <div id='barChart'>
         <div class="tooltip" id="tip"></div> 
@@ -177,7 +178,7 @@
                             cleaned = elem.getAttribute('id')
                             region = elem.getAttribute('region')
 
-                            console.log(cleaned)
+                            // console.log(cleaned)
 
                             if (selectedCities[region]){
                                 d3.select("#" + cleaned).style('stroke-width', 0)
@@ -400,7 +401,7 @@
 
         function updateLineChart(init) {
             // Getting new data    
-            makePriceDict(lineYear);            
+            makePriceDict(lineYear);           
             // New title
             lineChart.select("#title").remove();
             var titleText = "🥑Average Monthly Prices (" + lineYear + ")🥑";
@@ -437,6 +438,8 @@
                     })
                 };
             });
+
+            var numCities = values.length
 
             // --------------- DOMAINS ------------------ // 
             x.domain(d3.extent(valueDict, function(d) {
@@ -541,110 +544,212 @@
                 .attr('stroke', function(d){ return (lineColor(this.parentNode.__data__.name))} )
                 .attr('fill', function(d){ return (lineColor(this.parentNode.__data__.name))} )
 
-            var legend = value.append('circle')
-                .attr('class', 'legend')
-                .datum(function (d) {
-                    return {
-                        name: d.name,
-                        value: d.values[d.values.length - 1]
-                    }
-                })
-                .attr("cx", lineChartWidth + 40)
-                .attr("cy", function(d,i){ return i * 20; })
-                .attr("r", 5)
-                .style("fill", function(d){ return lineColor(d.name)})
+            // Add legend only if numCities is < 10
+            if (numCities <= 10) {
+                var legend = value.append('circle')
+                    .attr('class', 'legend')
+                    .datum(function (d) {
+                        return {
+                            name: d.name,
+                            value: d.values[d.values.length - 1]
+                        }
+                    })
+                    .attr("cx", lineChartWidth + 40)
+                    .attr("cy", function(d,i){ return i * 20; })
+                    .attr("r", 5)
+                    .style("fill", function(d){ return lineColor(d.name)})
 
-                value.append('text')
-                .attr('x', lineChartWidth + 50)
-                .attr('y', function(d, i) {
-                    return (i * 20);
-                })
-                .text(function(d) {
-                    return d.name;
-                })
-                .attr("dy", ".35em")
-                .attr("font-size", "10.5px")
-                .style("fill", "black");
+                    value.append('text')
+                    .attr('x', lineChartWidth + 50)
+                    .attr('y', function(d, i) {
+                        return (i * 20);
+                    })
+                    .text(function(d) {
+                        return d.name;
+                    })
+                    .attr("dy", ".35em")
+                    .attr("font-size", "10.5px")
+                    .style("fill", "black");
 
-            // Add mouse line
-            lineChart.selectAll(".mouse-over-effects").remove();
-            var mouseG = lineChart.append("g")
-            .attr("class", "mouse-over-effects");
+                // Add mouse line
+                lineChart.selectAll(".mouse-over-effects").remove();
+                var mouseG = lineChart.append("g")
+                .attr("class", "mouse-over-effects");
 
-            mouseG.append("path")
-            .attr("class", "mouse-line")
-            .style("stroke", "black")
-            .style("stroke-width", "1px")
-            .style("opacity", "0");
-
-            var lines = document.getElementsByClassName('line');
-
-            var mousePerLine = mouseG.selectAll('.mouse-per-line')
-                .data(values)
-                .enter()
-                .append("g")
-                .attr("class", "mouse-per-line");
-
-                mousePerLine.append("circle")
-                .attr("r", 7)
-                .style("stroke", function (d) {
-                    return lineColor(d.name);
-                })
-                .style("fill", "none")
-                .style("stroke-width", "2px")
+                mouseG.append("path")
+                .attr("class", "mouse-line")
+                .style("stroke", "black")
+                .style("stroke-width", "1px")
                 .style("opacity", "0");
 
-                mousePerLine.append("text")
-                    .attr("class", "hover-text")
-                    .attr("dy", "-1em")
-                    .attr("transform", "translate(10,3)");
+                //var lines = document.getElementsByClassName('line');
 
-            // Append a rect to catch mouse movements on canvas
-            mouseG.append('svg:rect') 
-            .attr('width', lineChartWidth) 
-            .attr('height', lineChartHeight)
-            .attr('fill', 'none')
-            .attr('pointer-events', 'all')
-            .on('mouseout', function () { // on mouse out hide line, circles and text
-                d3.select(".mouse-line")
-                .style("opacity", "0");
-                d3.selectAll(".mouse-per-line circle")
-                .style("opacity", "0");
-                d3.selectAll(".mouse-per-line text")
-                .style("opacity", "0");
-            })
-            .on('mouseover', function () { // on mouse in show line, circles and text
-                d3.select(".mouse-line")
-                .style("opacity", "1");
-                d3.selectAll(".mouse-per-line circle")
-                .style("opacity", "1");
-                d3.selectAll(".mouse-per-line text")
-                .style("opacity", "1");
-            })
-            .on('mousemove', function () { // mouse moving over canvas
-                var mouse = d3.mouse(this);
-                d3.selectAll(".mouse-per-line")
-                .attr("transform", function (d, i) {
-                    var xDate = x.invert(mouse[0]),
-                    bisect = d3.bisector(function (d) { return parser(d.date); }).left;
-                    idx = bisect(d.values, xDate);
+                var mousePerLine = mouseG.selectAll('.mouse-per-line')
+                    .data(values)
+                    .enter()
+                    .append("g")
+                    .attr("class", "mouse-per-line");
 
-                    var lineText = formatComma(y.invert(y(d.values[idx].value)).toFixed(2))
-                    if (lineMode == PRICE) {
-                        lineText = '$' + formatComma(y.invert(y(d.values[idx].value)).toFixed(2))
-                    }
-                    d3.select(this).select('text')
-                    .text(lineText);
+                    mousePerLine.append("circle")
+                    .attr("r", 7)
+                    .style("stroke", function (d) {
+                        return lineColor(d.name);
+                    })
+                    .style("fill", "none")
+                    .style("stroke-width", "2px")
+                    .style("opacity", "0");
 
+                    mousePerLine.append("text")
+                        .attr("class", "hover-text")
+                        .attr("dy", "-1em")
+                        .attr("transform", "translate(10,3)");
+
+                mouseG.append('svg:rect') 
+                .attr('width', lineChartWidth) 
+                .attr('height', lineChartHeight)
+                .attr('fill', 'none')
+                .attr('pointer-events', 'all')
+                .on('mouseout', function () { // on mouse out hide line, circles and text
                     d3.select(".mouse-line")
-                    .attr("d", function () {
-                        var data = "M" + x(parser(d.values[idx].date)) + "," + lineChartHeight;
-                        data += " " + x(parser(d.values[idx].date)) + "," + 0;
-                        return data;
+                    .style("opacity", "0");
+                    d3.selectAll(".mouse-per-line circle")
+                    .style("opacity", "0");
+                    d3.selectAll(".mouse-per-line text")
+                    .style("opacity", "0");
+                })
+                .on('mouseover', function () { // on mouse in show line, circles and text
+                    d3.select(".mouse-line")
+                    .style("opacity", "1");
+                    d3.selectAll(".mouse-per-line circle")
+                    .style("opacity", "1");
+                    d3.selectAll(".mouse-per-line text")
+                    .style("opacity", "1");
+                })
+                .on('mousemove', function () { // mouse moving over canvas
+                    var mouse = d3.mouse(this);
+                    d3.selectAll(".mouse-per-line")
+                    .attr("transform", function (d, i) {
+                        var xDate = x.invert(mouse[0]),
+                        bisect = d3.bisector(function (d) { return parser(d.date); }).left;
+                        idx = bisect(d.values, xDate);
+
+                        var lineText = formatComma(y.invert(y(d.values[idx].value)).toFixed(2))
+                        if (lineMode == PRICE) {
+                            lineText = '$' + formatComma(y.invert(y(d.values[idx].value)).toFixed(2))
+                        }
+                        d3.select(this).select('text')
+                        .text(lineText);
+
+                        d3.select(".mouse-line")
+                        .attr("d", function () {
+                            var data = "M" + x(parser(d.values[idx].date)) + "," + lineChartHeight;
+                            data += " " + x(parser(d.values[idx].date)) + "," + 0;
+                            return data;
+                        });
+                        return "translate(" + x(parser(d.values[idx].date)) + "," + y(d.values[idx].value) + ")";
                     });
-                    return "translate(" + x(parser(d.values[idx].date)) + "," + y(d.values[idx].value) + ")";
                 });
-            });
+            } else {
+                var selected = {}
+                lineChart.selectAll(".mouse-over-effects").remove();
+                // Append text to end of lines
+                value.append("text")
+                    .attr("class", "label")
+                    .datum(function (d) {
+                        return {
+                            name: d.name,
+                            value: d.values[d.values.length - 1]
+                        };
+                    })
+                    .attr("transform", function (d) {
+                        return "translate(" + x(parser(d.value.date)) + "," + y(d.value.value) + ")";
+                    })
+                    .attr("x", 3)
+                    .attr("dy", ".35em")
+                    .attr("font-size", "15px")
+                    .attr("opacity", 0)
+                    .text(function (d) {
+                        return d.name;
+                    });
+                
+                    var tip = d3.select('#priceTip')
+                        tip.style('opacity', 0)
+                        .style('height', pageWidth/40 + 'px')
+                        .style('width', pageWidth/20 +'px')
+                        .style('line-height', pageWidth/35 + 'px')
+                // Hovering over each circle shows price
+                var lines = d3.selectAll(".line")
+                value.selectAll("circle").on("mouseover", function(d) {
+                    var thisCircle = d3.select(this);
+                    thisCircle.style("r", 4).style("opacity", 1)
+                    var text = d.value
+                    if (lineMode == PRICE) {
+                        text = "$" + d.value;
+                    }
+                    tip.html(text)
+                        .style('opacity', 1)
+                        .style('left', d3.event.pageX - 80 + 'px')
+                        .style('top', d3.event.pageY - 20 + 'px');
+                }).on("mouseout", function(d) {
+                    d3.select(this).style("r", 2)
+                    tip.style('opacity', 0)
+                })
+
+                lines.on("mouseover", function(d) {
+                    var myName = d.name
+
+                    //Grey out all lines except selected
+                    lines.style("opacity", function(d) {
+                        if (d.name == myName || (d.name in selected)) {
+                            return 1;
+                        } 
+                        return 0.2;
+                    }).style("stroke-width", function(d) {
+                        if (d.name == myName || (d.name in selected)) {
+                            return 3;
+                        } 
+                        return 1;
+                    })
+
+                    // Delete all labels except selected
+                    d3.selectAll(".label").attr("opacity", function(d) {
+                        if (d.name == myName || (d.name in selected)) {
+                            return 1;
+                        } 
+                        return 0;
+                    })
+
+                    // Grey out unselected circles too
+                    value.selectAll("circle")
+                        .style("opacity", function(d) {
+                            var parentName = this.parentNode.__data__.name;
+                            if (parentName == myName || (parentName in selected)) return 1;
+                            return 0.2;
+                        })
+
+                    // Make current line bold
+                    d3.select(this).style("opacity", 1)
+                }).on("click", function (d) {
+                    if (!(d.name in selected)) {
+                        selected[d.name] = d;
+                    } else {
+                        delete selected[d.name];
+                    }
+                    if (Object.keys(selected).length === 0) {
+                        lines.style("opacity", 1).style("stroke-width", 1);
+                        value.selectAll("circle").style("opacity", 1)
+                    }
+                });
+            }
+        }
+
+        function nameInSelected(dict, name) {
+            for(var i in dict) {
+                if(dict[i].name == name) { 
+                    return true; 
+                }
+            }
+            return false;
         }
     
     // -------------------------------------------- BAR CHART -------------------------------------------//
@@ -756,7 +861,6 @@
         }
         yScale.domain([minDomain, d3.max(totalData, function(d) { return d.value; })]);
 
-        // Add the bars
         // Tooltip
         var tip = d3.select('#tip')
         tip.style('opacity', 0)
@@ -764,6 +868,7 @@
           .style('width', pageWidth/8 +'px')
           .style('line-height', pageWidth/35 + 'px')
 
+        // Add the bars
         var bars;
         if (!init) {
             d3.selectAll(".bar").remove();
@@ -826,7 +931,6 @@
                 .attr("dy", ".35em")
                 .attr("transform", "rotate(65)")
                 .style("text-anchor", "start")
-
         }
 
         // Append y axis
