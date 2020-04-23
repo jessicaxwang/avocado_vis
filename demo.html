@@ -17,13 +17,15 @@
     <div id='lineChart'>
         <div id ='yearDropdown'></div>
     </div>
+    <div id='info'>
+    </div>
     <div id='barChart'>
         <div class="tooltip" id="tip"></div> 
         <div id ='yearBar'>
             <label><input type="checkbox" id='sort'>Sort values</label>
         </div>
     </div>
-    <script>
+ <script>
         const PRICE = 0;
         const VOL = 1;
         const formatComma = d3.format(",");
@@ -41,18 +43,6 @@
         var pageHeight = window.innerHeight;
         var totalMap = d3.map();
         var totalData = [];
-
-
-        // // addEventListener version
-        // document.addEventListener('selectionchange', () => {
-        // console.log(document.getSelection());
-        // });
-
-        // // onselectionchange version
-        // document.onselectionchange = () => {
-        // console.log(document.getSelection());
-        // };
-    
 
         regionColors = {}
         var regionNames = ["Albany", "Atlanta", "Baltimore/Washington", "Boise", "Boston", "Buffalo/Rochester", 
@@ -75,12 +65,13 @@
     
         // Create Map
         var projection = d3.geoAlbersUsa()
-            .translate([pageWidth / 4 , pageHeight / 2])
-            .scale([((pageWidth/2)/792.5) * 1000]);
+            .translate([pageWidth / 4 , pageHeight / 3.9])
+            .scale([((pageWidth/2)/850) * 1000]);
     
+
         var path = d3.geoPath()
                     .projection(projection);
-    
+
         // Create line chart
         var margin = {left: 70, right: 40, top: 50, bottom: 100};
         // var lineChartWidth = pageWidth / 2.5;
@@ -123,7 +114,7 @@
         function addCityMarkers(data){
             var mapSvg = d3.select('#map').append('svg')
             .attr('width', pageWidth /2)
-            .attr('height', pageHeight)
+            .attr('height', (pageHeight / 2) + 25 + 'px')
             .on('mousedown', mousedown)
             .on('mouseup', mouseup)
                 
@@ -197,7 +188,6 @@
                             d3.selectAll('input').property('checked', false);
                             updateLineChart(false)
                             updateBarChart(false)
-
                         }
                 })
             }
@@ -207,6 +197,7 @@
                     .attr("class", "states")
                     .datum(topojson.feature(us, us.objects.states))
                     .attr("d", path)
+                    .attr('id', 'statesmap')
                 
 
                 data.forEach(function(d){ selectedCities[d.region] = false })
@@ -325,7 +316,28 @@
                         lineMode = newMode
                         updateLineChart(false)
                     })
-                })
+
+                // SETTING POSITION OF INFO DIV BECAUSE NEEDS TO KNOW THE HEIGHT OF MAPDIV
+
+                const mapdiv_height = document.getElementById('map').getBoundingClientRect().height
+                const mapdiv_width = document.getElementById('map').getBoundingClientRect().width
+                console.log(mapdiv_height)
+
+                d3.select("#info")
+                    .style('position', 'absolute')
+                    .style('left', "0px")
+                    .style('width', mapdiv_width + 'px')
+                    .style('top', mapdiv_height + 'px')
+                    .style('height', pageHeight/2.3 + 'px')
+                    .style('border', '1px solid black')
+
+                toastImage = d3.select('#info').append('img')
+                toastImage.attr('src', './toast2wtext2.png')
+                          .style('left', '30px')
+                          .attr('width', '60%')
+                          .attr('height', '100%')
+                                
+            })
         }
 
         clearAll.on("click", function() {
@@ -891,6 +903,27 @@
             .attr("transform", "rotate(65)")
             .style("text-anchor", "start")
     });
+
+    // mapheight = d3.select('states').attr('height')
+    // console.log('hell')
+    
+    // d3.select("#info")
+    //     .style('position', 'absolute')
+    //     .style('left', "-10px")
+    //     .style('width', '50%')
+    //     .style('height', pageHeight/2.3 + 'px')
+    //     .style('border', '1px solid black')
+    //     .attr('x', )
+    
+    // toastImage = d3.select('#info').append('img')
+    // toastImage.attr('src', './toast.png')
+    //           .attr('width', "100px")
+    //           .attr('height', '100px')
+    // d3.select("toastimg")
+    //     .attr('x', '3px')
+    //     .attr('y', '3px')
+    //     .attr('width', '3px')
+    //     .attr('height', '3px')
 
     </script>
 </body>
