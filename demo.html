@@ -137,18 +137,68 @@
 
                 mapSvg.on('mousemove', mousemove);
             }
+
+
+            imgWidth = pageWidth/40
+            imgHeight = pageWidth/40
+
             function mousemove(d){
-                var m = d3.mouse(this);     
+                // const elements = document.getElementsByClassName('avoIcon');
+                // const elementArray = Array.from(elements)
+                
+                var m = d3.mouse(this);   
+                
                 rect.attr("width", Math.max(0, m[0] - +rect.attr("x")))
                     .attr("height", Math.max(0, m[1] - +rect.attr("y")));
 
-                mapSvg.selectAll('image').each(function(d, i){
-                        console.log(d.region)
-                    })
+
             }
             function mouseup() {
                 mapSvg.on("mousemove", null);
                 mapSvg.select('rect').remove();
+
+                var m = d3.mouse(this);
+
+                const elements = document.getElementsByClassName('avoIcon');
+                const elementArray = Array.from(elements)
+
+                const mouse_end_x = m[0]
+                const mouse_end_y = m[1]
+
+                const rect_y = +rect.attr('y')
+                const rect_x = +rect.attr('x')
+
+
+                elementArray.map( (elem, i) => {
+                        y = elem.getAttribute('y')
+                        x = elem.getAttribute('x')
+                        if (y > rect_y && y < mouse_end_y && x > rect_x && x < mouse_end_x){
+                            cleaned = elem.getAttribute('id')
+                            region = elem.getAttribute('region')
+
+                            console.log(cleaned)
+
+                            if (selectedCities[region]){
+                                d3.select("#" + cleaned).style('stroke-width', 0)
+                                  .attr('xlink:href', './avocado.png')
+                            } else {
+                                d3.selectAll("#" + cleaned).style('stroke-width', 3)
+                                  .attr('xlink:href', './avocadoBorder.png')
+                            }
+
+                            selectedCities[region] = !selectedCities[region]
+                            if (noCitiesSelected()) {
+                                noneSelected = true;
+                            } else {
+                                noneSelected = false;
+                            }
+
+                            d3.selectAll('input').property('checked', false);
+                            updateLineChart(false)
+                            updateBarChart(false)
+
+                        }
+                })
             }
 
             d3.json("js/us.json", function(error, us){
@@ -172,6 +222,8 @@
                     .attr('xlink:href', './avocado.png')
                     .attr('x',function(d){ return projection([d.long, d.lat])[0] - (imgWidth/2)})
                     .attr('y',function(d){ return projection([d.long, d.lat])[1] - (imgHeight/2)})
+                    .attr('region', (d) => { return d.region })
+                    .attr('id', (d) => { return d.region.replace(/\//g, '').replace(/\./g,'').replace(' ','') })
                     .attr('width', imgWidth)
                     .attr('height', imgHeight)
                     .style('borderStyle', 'solid')
