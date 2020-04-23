@@ -739,6 +739,11 @@
                         lines.style("opacity", 1).style("stroke-width", 1);
                         value.selectAll("circle").style("opacity", 1)
                     }
+                }).on("mouseout", function(d) {
+                    if (Object.keys(selected).length === 0) {
+                        lines.style("opacity", 1).style("stroke-width", 1);
+                        value.selectAll("circle").style("opacity", 1)
+                    }
                 });
             }
         }
