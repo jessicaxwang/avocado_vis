@@ -86,7 +86,7 @@ label {
     pointer-events: none;			
 }
 
-rect {
+#selector {
     opacity: 0.2;
 }
 
