@@ -27,12 +27,14 @@
     <script>
         const PRICE = 0;
         const VOL = 1;
+        const maxLines = 10;
         const formatComma = d3.format(",");
         var noneSelected = true;
         var lineYear = 2019;
         var lineMode = PRICE;
         var barYear = 2019;
         var barMode = PRICE;
+        var values = []; // Line graph values
         var valueDict = [];
         var yearMenu = d3.select('#yearDropdown');
         var sortMenu = d3.select('#sort');
@@ -42,6 +44,7 @@
         var pageHeight = window.innerHeight;
         var totalMap = d3.map();
         var totalData = [];
+        var selected = {}; // Which lines are selected
 
 
         // // addEventListener version
@@ -155,6 +158,7 @@
 
 
             }
+
             function mouseup() {
                 mapSvg.on("mousemove", null);
                 mapSvg.select('rect').remove();
@@ -330,6 +334,7 @@
         }
 
         clearAll.on("click", function() {
+            selected = {}; // Clear selected lines
             for(var region in selectedCities) { 
                 selectedCities[region] = false;
             }
@@ -364,7 +369,7 @@
         });
 
         var months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
-        function makePriceDict() {
+        function makeValueDict() {
             valueDict = [{"month": "jan"},
                 {"month": "feb"},
                 {"month": "mar"},
@@ -401,7 +406,7 @@
 
         function updateLineChart(init) {
             // Getting new data    
-            makePriceDict(lineYear);           
+            makeValueDict(lineYear);           
             // New title
             lineChart.select("#title").remove();
             var titleText = "🥑Average Monthly Prices (" + lineYear + ")🥑";
@@ -427,7 +432,7 @@
                 return key !== 'month'
             }));
 
-            var values = color.domain().map(function(name) {
+            values = color.domain().map(function(name) {
                 return {
                     name: name,
                     values: valueDict.map(function(d) {
@@ -544,8 +549,15 @@
                 .attr('stroke', function(d){ return (lineColor(this.parentNode.__data__.name))} )
                 .attr('fill', function(d){ return (lineColor(this.parentNode.__data__.name))} )
 
+            // Prepare tooltip
+            var tip = d3.select('#priceTip')
+                        tip.style('opacity', 0)
+                        .style('height', pageWidth/40 + 'px')
+                        .style('width', pageWidth/20 +'px')
+                        .style('line-height', pageWidth/35 + 'px')
+
             // Add legend only if numCities is < 10
-            if (numCities <= 10) {
+            if (numCities <= maxLines) {
                 var legend = value.append('circle')
                     .attr('class', 'legend')
                     .datum(function (d) {
@@ -581,8 +593,6 @@
                 .style("stroke", "black")
                 .style("stroke-width", "1px")
                 .style("opacity", "0");
-
-                //var lines = document.getElementsByClassName('line');
 
                 var mousePerLine = mouseG.selectAll('.mouse-per-line')
                     .data(values)
@@ -650,8 +660,8 @@
                     });
                 });
             } else {
-                var selected = {}
                 lineChart.selectAll(".mouse-over-effects").remove();
+                
                 // Append text to end of lines
                 value.append("text")
                     .attr("class", "label")
@@ -672,11 +682,6 @@
                         return d.name;
                     });
                 
-                    var tip = d3.select('#priceTip')
-                        tip.style('opacity', 0)
-                        .style('height', pageWidth/40 + 'px')
-                        .style('width', pageWidth/20 +'px')
-                        .style('line-height', pageWidth/35 + 'px')
                 // Hovering over each circle shows price
                 var lines = d3.selectAll(".line")
                 value.selectAll("circle").on("mouseover", function(d) {
@@ -736,6 +741,12 @@
                         selected[d.name] = d;
                     } else {
                         delete selected[d.name];
+                        d3.select(this).style("stroke-width", function(d) {
+                        if (d.name in selected) {
+                            return 3;
+                        } 
+                        return 1;
+                    })
                     }
                     if (Object.keys(selected).length === 0) {
                         lines.style("opacity", 1).style("stroke-width", 1);
@@ -745,6 +756,13 @@
                     if (Object.keys(selected).length === 0) {
                         lines.style("opacity", 1).style("stroke-width", 1);
                         value.selectAll("circle").style("opacity", 1)
+                        var myName = d.name;
+                        d3.selectAll(".label").attr("opacity", function(d) {
+                            if (d.name ==  myName || (d.name in selected)) {
+                                return 1;
+                            } 
+                            return 0;
+                        })
                     }
                 });
             }
@@ -894,8 +912,8 @@
 
         // Mouseover handling
         bars.on("mouseover", function(d) {
-            d3.select(this).attr("opacity", 0.5)
-            tip.style('opacity', 0.9);
+            d3.select(this).attr("opacity", 0.5) // Highlight the bar
+            tip.style('opacity', 0.9); // Bring tooltip into focus
         })
         .on("mousemove", function (d) {
             var value = '$' + formatComma(d.value);
@@ -915,8 +933,67 @@
         .on("mouseout", function(d) {
                 d3.select(this).attr("opacity", 1)
                 tip.style('opacity', 0)
-        });
+        })
+        .on("click", function(d) {
+            if (totalData.length >= maxLines && totalData.length != 42) {
+                var myName = d.region
+                var lines = d3.selectAll(".line")
 
+                // If not in selected, add to selected
+                if (!(myName in selected)) {
+                    var data = values.filter(function (d) {
+                        if (d.name === myName) { return d.values };
+                    })
+                    selected[myName] = data[0];
+
+                    // Draw the lines and the circles
+                                        //Grey out all lines except selected
+                                        lines.style("opacity", function(d) {
+                        if (d.name == myName || (d.name in selected)) {
+                            return 1;
+                        } 
+                        return 0.2;
+                    }).style("stroke-width", function(d) {
+                        if (d.name == myName || (d.name in selected)) {
+                            return 3;
+                        } 
+                        return 1;
+                    })
+
+                    // Delete all labels except selected
+                    d3.selectAll(".label").attr("opacity", function(d) {
+                        if (d.name == myName || (d.name in selected)) {
+                            return 1;
+                        } 
+                        return 0;
+                    })
+
+                    // Grey out unselected circles too
+                    value.selectAll("circle")
+                        .style("opacity", function(d) {
+                            var parentName = this.parentNode.__data__.name;
+                            if (parentName == myName || (parentName in selected)) return 1;
+                            return 0.2;
+                        })
+
+                } else {
+                    delete selected[myName];
+                    // Reset the lines
+                    lines.style("stroke-width", function(d) {
+                        if (d.name in selected) {
+                            return 3;
+                        } 
+                        return 1;
+                    })
+
+                    if (Object.keys(selected).length === 0) {
+                        lines.style("opacity", 1).style("stroke-width", 1);
+                        value.selectAll("circle").style("opacity", 1)
+                    }
+                }
+            }
+        });
+        
         // Append x axis
         if (init) {
             barChart.append("g")
