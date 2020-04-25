@@ -10,9 +10,22 @@ html, body {
     stroke: #ffffff;
 }
 
+.button {
+    background-color: #A2BC80;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    font-size: 12px;
+    text-decoration: none;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
 #map {
     width: calc(50% - 3px);
-	float: left;
+    float: left;
+    cursor: crosshair;
 }
 
 #lineChart {

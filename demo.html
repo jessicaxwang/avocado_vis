@@ -11,7 +11,7 @@
 </head>
 <body>
     <div id='map'>
-        <div id ='buttonArea'></div>
+        <div><button class='button' id='clearAll'></button></div>
         <div id='maptip'></div>
     </div>
     <div id='lineChart'>
@@ -88,9 +88,8 @@
         .append("g")
             .attr("transform", "translate(" + 60 + "," + margin.top + ")");
 
-        var clearAll = d3.select("#buttonArea").append("button")
+        var clearAll = d3.select("#clearAll")
             .text("Clear All")
-            .attr("id", "clearAll")
         
         var xFormat = "%b";
         var parser = d3.timeParse("%b")
@@ -1005,7 +1004,7 @@
                 }
             }
         });
-        
+    
         // Append x axis
         if (init) {
             barChart.append("g")
@@ -1018,8 +1017,10 @@
                 .attr("dy", ".35em")
                 .attr("transform", "rotate(65)")
                 .style("text-anchor", "start")
+
         } else {
             barChart.select(".axis--x")
+                .attr("transform", "translate(0," + barChartHeight + ")")
                 .call(d3.axisBottom(xScale))
                 .selectAll("text")
                 .attr("y", 0)
@@ -1029,10 +1030,17 @@
                 .style("text-anchor", "start")
         }
 
+        // Only rotate axes if out of space
+        // if (totalData.length >= maxLines) {
+        //     console.log("rotating")
+        //     barChart.select(".axis--x")
+        // }
+
         // Append y axis
         var axisText = "Yearly Average Price (USD)"
         if (barMode == VOL)
             axisText = "Yearly Avocados Sold"
+
         if (init) {
             barChart.append("g")
                 .attr("class", "axis axis--y")
@@ -1085,11 +1093,11 @@
             .selectAll("g")
                 .delay(delay)
             .selectAll('text')
-            .attr("y", 0)
-            .attr("x", 9)
-            .attr("dy", ".35em")
-            .attr("transform", "rotate(65)")
-            .style("text-anchor", "start")
+                .attr("y", 0)
+                .attr("x", 9)
+                .attr("dy", ".35em")
+                .attr("transform", "rotate(65)")
+                .style("text-anchor", "start")
     });
 
     // mapheight = d3.select('states').attr('height')
