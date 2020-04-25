@@ -897,15 +897,6 @@
                 });
             }
         }
-
-        function nameInSelected(dict, name) {
-            for(var i in dict) {
-                if(dict[i].name == name) { 
-                    return true; 
-                }
-            }
-            return false;
-        }
     
     // -------------------------------------------- BAR CHART -------------------------------------------//
     // Create bar chart
@@ -1148,12 +1139,6 @@
                 .attr("transform", "rotate(65)")
                 .style("text-anchor", "start")
         }
-
-        // Only rotate axes if out of space
-        // if (totalData.length >= maxLines) {
-        //     console.log("rotating")
-        //     barChart.select(".axis--x")
-        // }
 
         // Append y axis
         var axisText = "Yearly Average Price (USD)"
