@@ -25,7 +25,6 @@ html, body {
 #map {
     width: calc(50% - 3px);
     float: left;
-    cursor: crosshair;
 }
 
 #lineChart {

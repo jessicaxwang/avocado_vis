@@ -124,6 +124,7 @@
             .attr('height', (pageHeight / 2) + 25 + 'px')
             .on('mousedown', mousedown)
             .on('mouseup', mouseup)
+            .style('cursor', 'crosshair')
                 
             function mousedown() {
                 var m = d3.mouse(this);
@@ -374,7 +375,7 @@
                         .attr('id', "pricesform")
                         .style('display', 'inline-block')
                          .style('position', 'absolute')
-                         .style('top', '5%')
+                         .style('top', '2%')
                          .style('left', '65%')
             var schema = {
                     fields: [
@@ -401,6 +402,7 @@
                     .data(schema.fields)
                     .enter()
                     .append("p")
+                    .style('margin', '3%')
                     .each(function(d){
                         var self = d3.select(this);
                         var label = self.append("label")
