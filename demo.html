@@ -19,6 +19,10 @@
         <div class="tooltip" id="priceTip"></div>
     </div>
     <div id='info'>
+        <!-- <form name="myForm">
+            Name*: <input type="text" name="name"> <br>
+            Password*: <input type="password" name="password"><br>
+            Email: <input type="text" name="email"><br></form> -->
     </div>
     <div id='barChart'>
         <div class="tooltip" id="tip"></div> 
@@ -340,9 +344,124 @@
                           .style('left', '30px')
                           .attr('width', '60%')
                           .attr('height', '100%')
-                                
+                
+
             })
         }
+
+
+        var regionPrices = d3.map()
+        d3.csv('./avgAvocado.csv', function(d) {
+            avgPrices = [d.janP, d.febP, d.marP, d.aprP, d.mayP, d.junP, d.julP, d.augP, d.sepP, d.octP, d.novP, d.decP]
+            avgVol = [d.janV, d.febV, d.marV, d.aprV, d.mayV, d.junV, d.julV, d.augV, d.sepV, d.octV, d.novV, d.decV]
+            regionPrices.set([d.region, d.year], [avgPrices, avgVol])
+        }, function (error, rows) {
+            // Initialize the line chart
+            updateLineChart(true);
+        });
+
+
+        const pricesPerMonth = {}
+        d3.csv('./pricepermonth.csv', function(d){
+            pricesPerMonth[d.region] = [+d.sixone, +d.sixtwo, +d.sixthree, +d.sixfour, +d.sixfive, +d.sixsix, +d.sixsev, +d.sixeight, +d.sixnine, +d.
+            sixten, +d.sixelev, +d.sixtwel, +d.sevone, +d.sevtwo, +d.sevthree, +d.sevfour, +d.sevfive, +d.sevsix, +d.sevsev, +d.sixeight, +d.sevnine, +d.sevten, +d.
+            sevelev, +d.sevtwel, +d.eightone, +d.eighttwo, +d.eightthree, +d.eightfour, +d.eightfive, +d.eightsix, +d.eightssevn, +d.eighteight, +d.eightnine, +d.
+            eightten, +d.eightelev, +d.eighttwel, +d.nine, +d.ninetwo, +d.ninethree, +d.ninefour, +d.ninefive, +d.ninesix, +d.ninessevn, +d.nineeight, +d.ninenine, +d.
+            nineten, +d.nineelev, +d.ninetwel]
+        }, function(error, rows){
+
+            form = d3.select('#info').append('form')
+                        .attr('id', "pricesform")
+                        .style('display', 'inline-block')
+                         .style('position', 'absolute')
+                         .style('top', '5%')
+                         .style('left', '65%')
+            var schema = {
+                    fields: [
+                        {name: 'House Price', type: 'text', display: 'House Price'},
+                        {name: 'Year', type: 'dropdown', display: 'Year',
+                            values: ['2016', '2017', '2018', '2019'] 
+                        },
+                        {name: 'Month', type: 'dropdown', display: 'Month',
+                            values: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] 
+                        },
+                        {name: 'Region', type: 'dropdown', display: 'Region',
+                            values: regionNames
+                        },
+                        {name: 'Avocado Price', type: 'text', display: 'Avocado Price'},
+                        {name: 'Not eaten AvoToast', type: 'text', display: 'Not eaten AvoToast'}
+                    ]
+                };
+
+
+            const toastPrice = 0.10417
+            var avoPrice = pricesPerMonth['Total U.S.'][47]
+
+            var p = form.selectAll("p")
+                    .data(schema.fields)
+                    .enter()
+                    .append("p")
+                    .each(function(d){
+                        var self = d3.select(this);
+                        var label = self.append("label")
+                            .text(d.display)
+                            .style("width", "100px")
+                            .style("display", "inline-block");
+
+                        if(d.type == 'text'){
+                            if (d.name == 'Avocado Price'){
+                                var input = self.append("input").attr('value', avoPrice)
+                                                .attr('readonly', true)
+                                                .attr('id', 'avocadoprice')
+                            } else if (d.name == 'Not eaten AvoToast'){
+                                var input = self.append("input").attr('value', Math.round(1000000/(avoPrice + toastPrice)))
+                                                .attr('readonly', true)
+                                                .attr('id', 'avotoast')
+                            } 
+                            else {
+                                var input = self.append('input').attr('id', 'houseprice').attr('value', '1000000')
+                            }
+                        }
+                        if(d.type == 'dropdown'){
+                            var select = self.append("select")
+                                    .attr("name", "country")
+                                    .attr('id', 'dropdown' + d.name)
+                                    .selectAll("option")
+                                    .data(d.values)
+                                    .enter()
+                                    .append("option")
+                                    .text(function(d) { return d; });
+                        }
+                    });
+
+            const monthToNum = {'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5, 
+                                'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11}
+            const yeartoNum = {'2016': 0, '2017': 1, '2018': 2, '2019': 3}
+
+            function updateAvotoast(){
+                const year = d3.select('#dropdownYear').node().value
+                const month = d3.select('#dropdownMonth').node().value
+                const region = d3.select('#dropdownRegion').node().value
+                const house = d3.select('#houseprice').node().value
+
+                avoPrice = pricesPerMonth[region][(yeartoNum[year]*12) + monthToNum[month]]
+
+                d3.select('#avocadoprice').attr('value', avoPrice)
+                d3.select('#avotoast').attr('value', Math.round(house / (avoPrice + toastPrice)))
+            }
+
+            d3.select('#houseprice')
+              .on('input', (d) => { updateAvotoast() })
+
+            d3.select("#dropdownYear")
+              .on('change', (d) => { updateAvotoast() })
+
+            d3.select("#dropdownMonth")
+              .on('change', (d) => { updateAvotoast() })
+
+            d3.select("#dropdownRegion")
+              .on('change', (d) => { updateAvotoast() })
+        })
 
         clearAll.on("click", function() {
             selected = {}; // Clear selected lines
@@ -1099,28 +1218,6 @@
                 .attr("transform", "rotate(65)")
                 .style("text-anchor", "start")
     });
-
-    // mapheight = d3.select('states').attr('height')
-    // console.log('hell')
-    
-    // d3.select("#info")
-    //     .style('position', 'absolute')
-    //     .style('left', "-10px")
-    //     .style('width', '50%')
-    //     .style('height', pageHeight/2.3 + 'px')
-    //     .style('border', '1px solid black')
-    //     .attr('x', )
-    
-    // toastImage = d3.select('#info').append('img')
-    // toastImage.attr('src', './toast.png')
-    //           .attr('width', "100px")
-    //           .attr('height', '100px')
-    // d3.select("toastimg")
-    //     .attr('x', '3px')
-    //     .attr('y', '3px')
-    //     .attr('width', '3px')
-    //     .attr('height', '3px')
-
     </script>
 </body>
 
