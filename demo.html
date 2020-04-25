@@ -947,7 +947,7 @@
                 tip.style('opacity', 0)
         })
         .on("click", function(d) {
-            if (totalData.length >= maxLines && totalData.length != 42) {
+            if (totalData.length > maxLines && totalData.length != 42) {
                 var myName = d.region
                 var lines = d3.selectAll(".line")
 
