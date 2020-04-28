@@ -99,7 +99,7 @@ label {
 }
 
 #maptip {	
-    position: relative;			
+    position: absolute;			
     text-align: center;			
     padding: 2px;				
     font: 12px sans-serif;		

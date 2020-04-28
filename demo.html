@@ -11,7 +11,7 @@
 </head>
 <body>
     <div id='map'>
-        <div><button class='button' id='clearAll'></button></div>
+        <div id='buttondiv'><button class='button' id='clearAll'></button></div>
         <div id='maptip'></div>
     </div>
     <div id='lineChart'>
@@ -19,10 +19,6 @@
         <div class="tooltip" id="priceTip"></div>
     </div>
     <div id='info'>
-        <!-- <form name="myForm">
-            Name*: <input type="text" name="name"> <br>
-            Password*: <input type="password" name="password"><br>
-            Email: <input type="text" name="email"><br></form> -->
     </div>
     <div id='barChart'>
         <div class="tooltip" id="tip"></div> 
@@ -70,15 +66,6 @@
         regionColors['Total U.S.'] = "black"
         regionColors['Albany'] = '#05d174'
         regionColors['Atlanta'] = '#0ba2e8'
-    
-        // Create Map
-        var projection = d3.geoAlbersUsa()
-            .translate([pageWidth / 4 , pageHeight / 3.9])
-            .scale([((pageWidth/2)/850) * 1000]);
-    
-
-        var path = d3.geoPath()
-                    .projection(projection);
 
         // Create line chart
         var margin = {left: 70, right: 40, top: 50, bottom: 100};
@@ -92,8 +79,19 @@
         .append("g")
             .attr("transform", "translate(" + 60 + "," + margin.top + ")");
 
+
+
+
+        const button_height = document.getElementById('clearAll').getBoundingClientRect().height
+        const button_width = document.getElementById('clearAll').getBoundingClientRect().width
+
         var clearAll = d3.select("#clearAll")
             .text("Clear All")
+
+        d3.select("#buttondiv")
+            .style('height', button_height + 'px')
+            .style('width', button_width + 'px')
+
         
         var xFormat = "%b";
         var parser = d3.timeParse("%b")
@@ -143,9 +141,6 @@
             imgHeight = pageWidth/40
 
             function mousemove(d){
-                // const elements = document.getElementsByClassName('avoIcon');
-                // const elementArray = Array.from(elements)
-                
                 var m = d3.mouse(this);   
                 
                 rect.attr("width", Math.max(0, m[0] - +rect.attr("x")))
@@ -202,6 +197,19 @@
             }
 
             d3.json("js/us.json", function(error, us){
+                const mapdiv_height = document.getElementById('map').getBoundingClientRect().height
+                const mapdiv_width = document.getElementById('map').getBoundingClientRect().width
+
+                // Create Map
+                var projection = d3.geoAlbersUsa()
+                    .translate([pageWidth / 4 , pageHeight / 3.9])
+                    .fitSize([mapdiv_width, mapdiv_height], topojson.feature(us, us.objects.states))
+                    .translate([mapdiv_width/2, mapdiv_height/2])
+            
+
+                var path = d3.geoPath()
+                            .projection(projection);
+
                 mapSvg.append("path")
                     .attr("class", "states")
                     .datum(topojson.feature(us, us.objects.states))
@@ -328,8 +336,8 @@
 
                 // SETTING POSITION OF INFO DIV BECAUSE NEEDS TO KNOW THE HEIGHT OF MAPDIV
 
-                const mapdiv_height = document.getElementById('map').getBoundingClientRect().height
-                const mapdiv_width = document.getElementById('map').getBoundingClientRect().width
+                // const mapdiv_height = document.getElementById('map').getBoundingClientRect().height
+                // const mapdiv_width = document.getElementById('map').getBoundingClientRect().width
                 console.log(mapdiv_height)
 
                 d3.select("#info")
@@ -338,7 +346,7 @@
                     .style('width', mapdiv_width + 'px')
                     .style('top', mapdiv_height + 'px')
                     .style('height', pageHeight/2.3 + 'px')
-                    .style('border', '1px solid black')
+                    // .style('border', '1px solid black')
 
                 toastImage = d3.select('#info').append('img')
                 toastImage.attr('src', './toast2wtext2.png')
