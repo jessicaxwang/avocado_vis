@@ -11,9 +11,7 @@
 </head>
 <body>
     <div id='map'>
-        <div id='buttondiv'>
-            <!-- <button class='button' id='clearAll'></button> -->
-        </div>
+        <div id='buttondiv'><button class='button' id='clearAll'></button></div>
         <div id='maptip'></div>
     </div>
     <div id='lineChart'>
@@ -83,6 +81,18 @@
 
 
 
+
+        const button_height = document.getElementById('clearAll').getBoundingClientRect().height
+        const button_width = document.getElementById('clearAll').getBoundingClientRect().width
+
+        var clearAll = d3.select("#clearAll")
+            .text("Clear All")
+
+        d3.select("#buttondiv")
+            .style('height', button_height + 'px')
+            .style('width', button_width + 'px')
+
+        
         var xFormat = "%b";
         var parser = d3.timeParse("%b")
 
@@ -212,7 +222,7 @@
                 var tip = d3.select('#maptip')
 
                 var imgWidth = pageWidth/40
-                var imgHeight = pageHeight/29
+                var imgHeight = pageWidth/40
                 mapSvg.selectAll('img')
                     .data(data)
                     .enter()
@@ -251,7 +261,7 @@
                     .on('mouseout', function (d) { 
                         tip.style('opacity', 0)
                         imgWidth = pageWidth/40
-                        imgHeight = pageHeight/29
+                        imgHeight = pageWidth/40
                         d3.select(this)
                           .attr('x',function(d){ return projection([d.long, d.lat])[0] - (imgWidth/2)})
                           .attr('y',function(d){ return projection([d.long, d.lat])[1] - (imgHeight/2)})
@@ -337,18 +347,7 @@
                           .style('left', '30px')
                           .attr('width', '60%')
                           .attr('height', '100%')
-
-
-
-
-                // <button class='button' id='clearAll'>
-                var clearAll = d3.select("#buttondiv").append('button')
-                    .attr('class', 'button')
-                    .attr('id', 'clearAll')
-                    .text("Clear All")
-
-                const button_height = document.getElementById('clearAll').getBoundingClientRect().height
-                const button_width = document.getElementById('clearAll').getBoundingClientRect().width
+                
 
             })
         }
@@ -384,10 +383,10 @@
                     fields: [
                         {name: 'House Price', type: 'text', display: 'House Price'},
                         {name: 'Year', type: 'dropdown', display: 'Year',
-                            values: ['2019', '2018', '2017', '2016']
+                            values: ['2016', '2017', '2018', '2019'] 
                         },
                         {name: 'Month', type: 'dropdown', display: 'Month',
-                            values: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+                            values: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] 
                         },
                         {name: 'Region', type: 'dropdown', display: 'Region',
                             values: regionNames
@@ -436,10 +435,6 @@
                                     .enter()
                                     .append("option")
                                     .text(function(d) { return d; });
-
-                            if (d.name = 'Month'){
-                                select.property('selected', (d) => { return (d == "Dec")})
-                            }
                         }
                     });
 
@@ -472,7 +467,6 @@
               .on('change', (d) => { updateAvotoast() })
         })
 
-        clearAll = d3.select('clearAll')
         clearAll.on("click", function() {
             selected = {}; // Clear selected lines
             for(var region in selectedCities) { 
