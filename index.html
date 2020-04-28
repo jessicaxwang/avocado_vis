@@ -87,7 +87,7 @@
         var parser = d3.timeParse("%b")
 
 // ------------- CREATE AND POPULATE MAP ------------- //
-        d3.csv('./regionLatLong.csv', function(d){
+        d3.csv('csv/regionLatLong.csv', function(d){
             return{
                 region: d.region,
                 lat: +d.lat,
@@ -166,10 +166,10 @@
 
                             if (selectedCities[region]){
                                 d3.select("#" + cleaned).style('stroke-width', 0)
-                                  .attr('xlink:href', './avocado.png')
+                                  .attr('xlink:href', 'img/avocado.png')
                             } else {
                                 d3.selectAll("#" + cleaned).style('stroke-width', 3)
-                                  .attr('xlink:href', './avocadoBorder.png')
+                                  .attr('xlink:href', 'img/avocadoBorder.png')
                             }
 
                             selectedCities[region] = !selectedCities[region]
@@ -218,7 +218,7 @@
                     .enter()
                     .append('svg:image')
                     .attr("class", "avoIcon")
-                    .attr('xlink:href', './avocado.png')
+                    .attr('xlink:href', 'img/avocado.png')
                     .attr('x',function(d){ return projection([d.long, d.lat])[0] - (imgWidth/2)})
                     .attr('y',function(d){ return projection([d.long, d.lat])[1] - (imgHeight/2)})
                     .attr('region', (d) => { return d.region })
@@ -261,10 +261,10 @@
                     .on('click', function(d) { 
                         if (selectedCities[d.region]){
                             d3.select(this).style('stroke-width', 0)
-                              .attr('xlink:href', './avocado.png')
+                              .attr('xlink:href', 'img/avocado.png')
                         } else {
                             d3.select(this).style('stroke-width', 3)
-                              .attr('xlink:href', './avocadoBorder.png')
+                              .attr('xlink:href', 'img/avocadoBorder.png')
                         }
                         selectedCities[d.region] = !selectedCities[d.region]
                         if (noCitiesSelected()) {
@@ -333,7 +333,7 @@
                     .style('height', pageHeight/2.3 + 'px')
 
                 toastImage = d3.select('#info').append('img')
-                toastImage.attr('src', './toast2wtext2.png')
+                toastImage.attr('src', 'img/toast2wtext2.png')
                           .style('left', '30px')
                           .attr('width', '60%')
                           .attr('height', '100%')
@@ -355,7 +355,7 @@
 
 
         var regionPrices = d3.map()
-        d3.csv('./avgAvocado.csv', function(d) {
+        d3.csv('csv/avgAvocado.csv', function(d) {
             avgPrices = [d.janP, d.febP, d.marP, d.aprP, d.mayP, d.junP, d.julP, d.augP, d.sepP, d.octP, d.novP, d.decP]
             avgVol = [d.janV, d.febV, d.marV, d.aprV, d.mayV, d.junV, d.julV, d.augV, d.sepV, d.octV, d.novV, d.decV]
             regionPrices.set([d.region, d.year], [avgPrices, avgVol])
@@ -366,7 +366,7 @@
 
 
         const pricesPerMonth = {}
-        d3.csv('./pricepermonth.csv', function(d){
+        d3.csv('csv/pricepermonth.csv', function(d){
             pricesPerMonth[d.region] = [+d.sixone, +d.sixtwo, +d.sixthree, +d.sixfour, +d.sixfive, +d.sixsix, +d.sixsev, +d.sixeight, +d.sixnine, +d.
             sixten, +d.sixelev, +d.sixtwel, +d.sevone, +d.sevtwo, +d.sevthree, +d.sevfour, +d.sevfive, +d.sevsix, +d.sevsev, +d.sixeight, +d.sevnine, +d.sevten, +d.
             sevelev, +d.sevtwel, +d.eightone, +d.eighttwo, +d.eightthree, +d.eightfour, +d.eightfive, +d.eightsix, +d.eightssevn, +d.eighteight, +d.eightnine, +d.
@@ -481,7 +481,7 @@
             noneSelected = true;
             d3.select('#map').select("svg").selectAll('.avoIcon')
                 .style('stroke-width', 0)
-                .attr('xlink:href', './avocado.png')
+                .attr('xlink:href', 'img/avocado.png')
             d3.selectAll('input').property('checked', false);
             updateLineChart(false);
             updateBarChart(false);
@@ -499,7 +499,7 @@
 // ------------------------------------------- LINE CHART -------------------------------------------- //
 
         var regionPrices = d3.map()
-        d3.csv('./avgAvocado.csv', function(d) {
+        d3.csv('csv/avgAvocado.csv', function(d) {
             avgPrices = [d.janP, d.febP, d.marP, d.aprP, d.mayP, d.junP, d.julP, d.augP, d.sepP, d.octP, d.novP, d.decP]
             avgVol = [d.janV, d.febV, d.marV, d.aprV, d.mayV, d.junV, d.julV, d.augV, d.sepV, d.octV, d.novV, d.decV]
             regionPrices.set([d.region, d.year], [avgPrices, avgVol])
@@ -911,7 +911,7 @@
     // -------------------------------------------- BAR CHART -------------------------------------------//
     // Create bar chart
 
-    d3.csv('./avgTotals.csv', function(d) {
+    d3.csv('csv/avgTotals.csv', function(d) {
         totalMap.set([d.region, d.year], [d.avg, d.totalVol])
     }, function (error, rows) {
         updateBarChart(true);
