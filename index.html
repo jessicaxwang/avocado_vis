@@ -389,10 +389,10 @@
                     fields: [
                         {name: 'House Price', type: 'text', display: 'House Price'},
                         {name: 'Year', type: 'dropdown', display: 'Year',
-                            values: ['2016', '2017', '2018', '2019'] 
+                            values: ['2019', '2018', '2017', '2016']
                         },
                         {name: 'Month', type: 'dropdown', display: 'Month',
-                            values: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] 
+                            values: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
                         },
                         {name: 'Region', type: 'dropdown', display: 'Region',
                             values: regionNames
@@ -441,6 +441,10 @@
                                     .enter()
                                     .append("option")
                                     .text(function(d) { return d; });
+
+                            if (d.name = 'Month'){
+                                select.property('selected', (d) => { return (d == "Dec")})
+                            }
                         }
                     });
 
