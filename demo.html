@@ -203,7 +203,7 @@
                 // Create Map
                 var projection = d3.geoAlbersUsa()
                     .translate([pageWidth / 4 , pageHeight / 3.9])
-                    .fitSize([mapdiv_width, mapdiv_height], topojson.feature(us, us.objects.states))
+                    .fitSize([mapdiv_width, mapdiv_height / 1.2], topojson.feature(us, us.objects.states))
                     .translate([mapdiv_width/2, mapdiv_height/2])
             
 
