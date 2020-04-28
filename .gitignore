@@ -1,1 +1,3 @@
-*.py
+python/*.py
+.regionnames.txt
+
