@@ -11,7 +11,9 @@
 </head>
 <body>
     <div id='map'>
-        <div id='buttondiv'><button class='button' id='clearAll'></button></div>
+        <div id='buttondiv'>
+            <!-- <button class='button' id='clearAll'></button> -->
+        </div>
         <div id='maptip'></div>
     </div>
     <div id='lineChart'>
@@ -81,18 +83,6 @@
 
 
 
-
-        const button_height = document.getElementById('clearAll').getBoundingClientRect().height
-        const button_width = document.getElementById('clearAll').getBoundingClientRect().width
-
-        var clearAll = d3.select("#clearAll")
-            .text("Clear All")
-
-        d3.select("#buttondiv")
-            .style('height', button_height + 'px')
-            .style('width', button_width + 'px')
-
-        
         var xFormat = "%b";
         var parser = d3.timeParse("%b")
 
@@ -347,7 +337,18 @@
                           .style('left', '30px')
                           .attr('width', '60%')
                           .attr('height', '100%')
-                
+
+
+
+
+                // <button class='button' id='clearAll'>
+                var clearAll = d3.select("#buttondiv").append('button')
+                    .attr('class', 'button')
+                    .attr('id', 'clearAll')
+                    .text("Clear All")
+
+                const button_height = document.getElementById('clearAll').getBoundingClientRect().height
+                const button_width = document.getElementById('clearAll').getBoundingClientRect().width
 
             })
         }
@@ -471,6 +472,7 @@
               .on('change', (d) => { updateAvotoast() })
         })
 
+        clearAll = d3.select('clearAll')
         clearAll.on("click", function() {
             selected = {}; // Clear selected lines
             for(var region in selectedCities) { 
