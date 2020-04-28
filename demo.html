@@ -335,18 +335,12 @@
                     })
 
                 // SETTING POSITION OF INFO DIV BECAUSE NEEDS TO KNOW THE HEIGHT OF MAPDIV
-
-                // const mapdiv_height = document.getElementById('map').getBoundingClientRect().height
-                // const mapdiv_width = document.getElementById('map').getBoundingClientRect().width
-                console.log(mapdiv_height)
-
                 d3.select("#info")
                     .style('position', 'absolute')
                     .style('left', "0px")
                     .style('width', mapdiv_width + 'px')
                     .style('top', mapdiv_height + 'px')
                     .style('height', pageHeight/2.3 + 'px')
-                    // .style('border', '1px solid black')
 
                 toastImage = d3.select('#info').append('img')
                 toastImage.attr('src', './toast2wtext2.png')
@@ -706,13 +700,13 @@
                             value: d.values[d.values.length - 1]
                         }
                     })
-                    .attr("cx", lineChartWidth + 40)
+                    .attr("cx", lineChartWidth + 20)
                     .attr("cy", function(d,i){ return i * 20; })
                     .attr("r", 5)
                     .style("fill", function(d){ return lineColor(d.name)})
 
                     value.append('text')
-                    .attr('x', lineChartWidth + 50)
+                    .attr('x', lineChartWidth + 30)
                     .attr('y', function(d, i) {
                         return (i * 20);
                     })
