@@ -313,6 +313,20 @@
                 .attr('class', 'button')
                 .attr('id', 'clearAll')
                 .text("Clear All")
+                .on("click", function() {
+                    console.log("CLICKED")
+                    selected = {}; // Clear selected lines
+                    for(var region in selectedCities) { 
+                        selectedCities[region] = false;
+                    }
+                    noneSelected = true;
+                    d3.select('#map').select("svg").selectAll('.avoIcon')
+                        .style('stroke-width', 0)
+                        .attr('xlink:href', 'img/avocado.png')
+                    d3.selectAll('input').property('checked', false);
+                    updateLineChart(false);
+                    updateBarChart(false);
+                });
 
             const button_height = document.getElementById('clearAll').getBoundingClientRect().height
             const button_width = document.getElementById('clearAll').getBoundingClientRect().width
@@ -438,21 +452,6 @@
         d3.select("#dropdownRegion")
             .on('change', (d) => { updateAvotoast() })
     })
-
-    clearAll = d3.select('clearAll')
-    clearAll.on("click", function() {
-        selected = {}; // Clear selected lines
-        for(var region in selectedCities) { 
-            selectedCities[region] = false;
-        }
-        noneSelected = true;
-        d3.select('#map').select("svg").selectAll('.avoIcon')
-            .style('stroke-width', 0)
-            .attr('xlink:href', 'img/avocado.png')
-        d3.selectAll('input').property('checked', false);
-        updateLineChart(false);
-        updateBarChart(false);
-    });
 
     function noCitiesSelected() {
         for(var region in selectedCities) { 
