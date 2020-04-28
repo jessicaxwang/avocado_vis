@@ -222,7 +222,7 @@
                 var tip = d3.select('#maptip')
 
                 var imgWidth = pageWidth/40
-                var imgHeight = pageWidth/40
+                var imgHeight = pageHeight/29
                 mapSvg.selectAll('img')
                     .data(data)
                     .enter()
@@ -261,7 +261,7 @@
                     .on('mouseout', function (d) { 
                         tip.style('opacity', 0)
                         imgWidth = pageWidth/40
-                        imgHeight = pageWidth/40
+                        imgHeight = pageHeight/29
                         d3.select(this)
                           .attr('x',function(d){ return projection([d.long, d.lat])[0] - (imgWidth/2)})
                           .attr('y',function(d){ return projection([d.long, d.lat])[1] - (imgHeight/2)})
